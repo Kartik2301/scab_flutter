@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "959346351284",
+    "firebase_url": "https://scab-flutter.firebaseio.com",
+    "project_id": "scab-flutter",
+    "storage_bucket": "scab-flutter.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:959346351284:android:cbdc29f59b7f1d5c024be1",
+        "android_client_info": {
+          "package_name": "com.harchani.scab_flutter"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "959346351284-oinkp8uhpjq2i46u6aj1kmpeu15hkp4r.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.harchani.scab_flutter",
+            "certificate_hash": "8d4b1441dc0b930f255306533481dc90df86867a"
+          }
+        },
+        {
+          "client_id": "959346351284-apou0dk6ftvvs0iaeecv7mgeqgpr26aq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyArTPvvWZnx_-ApHW2XDuZRXxjMKNauWW4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "959346351284-apou0dk6ftvvs0iaeecv7mgeqgpr26aq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
