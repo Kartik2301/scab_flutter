@@ -1,15 +1,17 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:scab_flutter/constants.dart';
-import 'package:scab_flutter/resources/sign_in.dart';
 import 'package:scab_flutter/resources/objects.dart';
+import 'package:scab_flutter/screens/room_search_screen.dart';
 import 'package:scab_flutter/screens/show_profile.dart';
 
 User _user = User();
 bool loadingUserData;
 String source,destination;
+int hour,minutes;
 
 class JourneyPlanScreen extends StatefulWidget {
   static String id = 'journey_plan';
@@ -94,7 +96,31 @@ class _JourneyPlanScreenState extends State<JourneyPlanScreen> {
                   style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                 ),
                 getDestinationDropDownButton(),
+                Row(
+                  children: <Widget>[
+                    Text('TIME'),
+                    Flexible(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: getHourPicker(),
+                      ),
+                    ),
+                    Flexible(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: getMinutePicker(),
+                      ),
+                    ),
+                  ],
+                ),
+                RaisedButton(
+                  child: Text('Search Rides'),
+                  onPressed: (){
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>RoomSearch(user: _user,)));
+                  },
+                ),
               ],
+
             ),
           ),
         ),
@@ -139,6 +165,44 @@ class _JourneyPlanScreenState extends State<JourneyPlanScreen> {
             print(destination);
           });
         });
+  }
+
+  CupertinoPicker getHourPicker()
+  {
+    List<Text> currencyList = [];
+    for(int currency in hourList)
+    {
+      currencyList.add(Text(currency.toString()));
+    }
+
+    return CupertinoPicker(
+      backgroundColor: Colors.white,
+      itemExtent: 32.0,
+      children: currencyList,
+      onSelectedItemChanged: (value){
+        hour= int.parse(currencyList[value].data);
+        print(hour);
+      },
+    );
+  }
+
+  CupertinoPicker getMinutePicker()
+  {
+    List<Text> currencyList = [];
+    for(int currency in minuteList)
+    {
+      currencyList.add(Text(currency.toString()));
+    }
+
+    return CupertinoPicker(
+      backgroundColor: Colors.white,
+      itemExtent: 32.0,
+      children: currencyList,
+      onSelectedItemChanged: (value){
+        minutes= int.parse(currencyList[value].data);
+        print(minutes);
+      },
+    );
   }
 
   Future<bool> _onWillPop() async {

@@ -10,6 +10,8 @@ List<String> placesList = [
   'Bamrauli Airport',
   'Civil Lines',
 ];
+var hourList = new List<int>.generate(24, (i) => i + 1);
+var minuteList = new List<int>.generate(60, (i) => i + 1);
 
 const kSPuid = 'userId';
 const kSPfirstLogIn='firstLogIn';
