@@ -9,6 +9,7 @@ import 'package:scab_flutter/screens/show_profile.dart';
 
 User _user = User();
 bool loadingUserData;
+String source,destination;
 
 class JourneyPlanScreen extends StatefulWidget {
   static String id = 'journey_plan';
@@ -21,8 +22,6 @@ class JourneyPlanScreen extends StatefulWidget {
 }
 
 class _JourneyPlanScreenState extends State<JourneyPlanScreen> {
-
-
 
   void getUserProfileData() async {
     final _firestore= Firestore.instance;
@@ -51,52 +50,95 @@ class _JourneyPlanScreenState extends State<JourneyPlanScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print(uid);
     return WillPopScope(
       onWillPop: _onWillPop,
       child: SafeArea(
         child: Scaffold(
-          body: Column(
-            children: <Widget>[
-              RaisedButton(
-                color: loadingUserData?Colors.grey:kThemeColor,
-                child: Text('SHOW PROFILE'),
-                onPressed: (){
-                  loadingUserData? print('Please Wait'):Navigator.push(context, MaterialPageRoute(builder: (context)=>ShowProfile(_user)));
-                },
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Icon(
-                    Icons.card_giftcard,
-                    size: 40,
-                  ),
-                  SizedBox(
-                    width: 15.0,
-                  ),
-                  Text(
-                    'Search Ride',
-                    style: TextStyle(
-                        color: kThemeColor,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 30),
-                  )
-                ],
-              ),
-              Text(
-                'From',
-                style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-              ),
-              Text(
-                'To',
-                style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-              ),
-            ],
+          body: Padding(
+            padding: const EdgeInsets.all(32.0),
+            child: Column(
+              children: <Widget>[
+                RaisedButton(
+                  color: loadingUserData?Colors.grey:kThemeColor,
+                  child: Text('SHOW PROFILE'),
+                  onPressed: (){
+                    loadingUserData? print('Please Wait'):Navigator.push(context, MaterialPageRoute(builder: (context)=>ShowProfile(_user)));
+                  },
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Icon(
+                      Icons.card_giftcard,
+                      size: 40,
+                    ),
+                    SizedBox(
+                      width: 15.0,
+                    ),
+                    Text(
+                      'Search Ride',
+                      style: TextStyle(
+                          color: kThemeColor,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 30),
+                    )
+                  ],
+                ),
+                Text(
+                  'From',
+                  style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                ),
+                getSourceDropDownButton(),
+                Text(
+                  'To',
+                  style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                ),
+                getDestinationDropDownButton(),
+              ],
+            ),
           ),
         ),
       ),
     );
+  }
+
+  DropdownButton<String> getSourceDropDownButton() {
+    List <DropdownMenuItem<String>> dropDownMenuItems = [];
+    for (String event in placesList) {
+      var newItem = DropdownMenuItem(
+        child: Text(event),
+        value: event,
+      );
+      dropDownMenuItems.add(newItem);
+    }
+    return DropdownButton<String>(
+        value: source,
+        items: dropDownMenuItems,
+        onChanged: (value){
+          setState(() {
+            source = value;
+            print(source);
+          });
+        });
+  }
+  DropdownButton<String> getDestinationDropDownButton() {
+    List <DropdownMenuItem<String>> dropDownMenuItems = [];
+    for (String event in placesList) {
+      var newItem = DropdownMenuItem(
+        child: Text(event),
+        value: event,
+      );
+      dropDownMenuItems.add(newItem);
+    }
+    return DropdownButton<String>(
+        value: destination,
+        items: dropDownMenuItems,
+        onChanged: (value){
+          setState(() {
+            destination = value;
+            print(destination);
+          });
+        });
   }
 
   Future<bool> _onWillPop() async {
