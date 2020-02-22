@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:scab_flutter/constants.dart';
+import 'package:scab_flutter/screens/in_room_screen.dart';
 import 'package:scab_flutter/screens/intro_screen.dart';
 
 import 'objects.dart';
@@ -68,20 +69,44 @@ class RoomCard extends StatelessWidget {
             ),
             //TODO: Time Row Here
             RaisedButton(
-              color: Colors.black,
-              child: Text(joiningStatus??'Join Request',style: TextStyle(color: Colors.white),),
+              color: joiningStatus==kJoinRequest?Colors.black:(joiningStatus==kConfirmJoin?kThemeColor:Colors.red),
+              child: Text(joiningStatus??kJoinRequest,style: TextStyle(color: Colors.white),),
               onPressed: (){
-                //TODO:Send Joining Requests
-                Firestore.instance.collection(source).document(roomId).collection('requests').document(IntroScreen.getUid()).setData({
-                  'status': kPendingRequest,
-                  'uid' : IntroScreen.getUid(),
-                  'createdAt': Timestamp.now(),
-                });
-                Firestore.instance.collection('users').document(IntroScreen.getUid()).collection('myRooms').document(roomId).setData({
-                  'status': kPendingRequest,
-                  'roomId':roomId,
-                  'createdAt': Timestamp.now(),
-                });
+
+                if(joiningStatus==kJoinRequest) {
+                  //TODO:Send Joining Requests
+                  Firestore.instance.collection(source).document(roomId)
+                      .collection('requests').document(IntroScreen.getUid())
+                      .setData({
+                    'status': kPendingRequest,
+                    'uid': IntroScreen.getUid(),
+                    'createdAt': Timestamp.now(),
+                  });
+                  Firestore.instance.collection('users').document(
+                      IntroScreen.getUid()).collection('myRooms').document(
+                      roomId).setData({
+                    'status': kPendingRequest,
+                    'roomId': roomId,
+                    'createdAt': Timestamp.now(),
+                  });
+                }
+                else if(joiningStatus==kConfirmJoin)
+                  {
+                    print(roomId);
+                    Firestore.instance.collection(source).document(roomId)
+                        .updateData({
+                    'newUser': IntroScreen.getUid(),
+                    });
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>InRoom(
+                      source: source,
+                      destination: destination,
+                      isOwner: false,
+                      roomId: roomId,
+                    )));
+                  }
+                else{
+                  //Do nothing when requests is pending
+                  }
               },
             ),
           ],
@@ -90,6 +115,7 @@ class RoomCard extends StatelessWidget {
     );
   }
 }
+
 
 
 class RequestCard extends StatelessWidget {
@@ -119,10 +145,10 @@ class RequestCard extends StatelessWidget {
                   onPressed: (){
                     //TODO: Implement Accept Functionality
                     Firestore.instance.collection(source).document(roomId).collection('requests').document(requestedUID).updateData({
-                      'status': "ACCEPTED",
+                      'status': kConfirmJoin,
                     });
                     Firestore.instance.collection('users').document(requestedUID).collection('myRooms').document(roomId).updateData({
-                      'status': "ACCEPTED",
+                      'status': kConfirmJoin,
                     });
                   },
                 ),
@@ -176,6 +202,60 @@ class MemberCard extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+
+
+class MessageBubble extends StatelessWidget {
+  final String text;
+  final String sender;
+  final bool isMe;
+
+
+  MessageBubble({this.text, this.sender,this.isMe});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.all(10.0),
+      child: Column(
+        crossAxisAlignment: isMe?CrossAxisAlignment.end:CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            sender,
+            style: TextStyle(
+              color: isMe?Colors.black54:Colors.white,
+              fontSize: 12.0,
+            ),
+          ),
+          Material(
+            elevation: 5.0,
+            borderRadius: isMe?BorderRadius.only(
+                topLeft: Radius.circular(30.0),
+                bottomLeft: Radius.circular(30.0),
+                bottomRight: Radius.circular(30.0)
+            ):BorderRadius.only(
+                topRight: Radius.circular(30.0),
+                bottomLeft: Radius.circular(30.0),
+                bottomRight: Radius.circular(30.0)
+            ),
+            color: isMe?Colors.lightBlueAccent:Colors.white,
+            child: Padding(
+              padding:  EdgeInsets.symmetric(horizontal: 20.0,
+                  vertical: 10.0),
+              child: Text(
+                text,
+                style: TextStyle(
+                  fontSize: 15.0,
+                  color: isMe? Colors.white:Colors.black,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

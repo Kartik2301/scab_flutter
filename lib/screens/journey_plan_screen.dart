@@ -16,6 +16,7 @@ int hour,minutes;
 
 class JourneyPlanScreen extends StatefulWidget {
   static String id = 'journey_plan';
+  static String username;
   final String mUid;
   JourneyPlanScreen({this.mUid});
 
@@ -33,6 +34,7 @@ class _JourneyPlanScreenState extends State<JourneyPlanScreen> {
     _user.uid=widget.mUid;
     _user.imageUrl=document.data['imageUrl'];
     _user.fullName= document.data['fullName'];
+    JourneyPlanScreen.username=_user.fullName.substring(0,_user.fullName.indexOf(' '));
     _user.email=document.data['email'];
     _user.gender=document.data['gender'];
     _user.phoneNumber=document.data['phoneNumber'];

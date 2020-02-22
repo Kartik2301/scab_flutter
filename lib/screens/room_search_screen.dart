@@ -60,6 +60,7 @@ class _RoomSearchState extends State<RoomSearch> {
               source: fetchedRoom.source,
               destination: fetchedRoom.destination,
               joiningStatus: status,
+              roomId: roomId,
             ));
 
         setState(() {
@@ -84,7 +85,7 @@ class _RoomSearchState extends State<RoomSearch> {
         ownerRoll = "IEC2018069";
         roomId = message.data['roomId']??'Room Id Unavailable';
 
-        updatedRoomsList.add(RoomCard(source: source,destination:destination,ownerRoll: ownerRoll,roomOwner:roomOwner,roomId: roomId,));
+        updatedRoomsList.add(RoomCard(source: source,destination:destination,ownerRoll: ownerRoll,roomOwner:roomOwner,roomId: roomId,joiningStatus: kJoinRequest,));
       }
       setState(() {
         roomsList = updatedRoomsList;

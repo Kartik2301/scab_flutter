@@ -118,11 +118,23 @@ class _InRoomState extends State<InRoom> {
               ),
             ),
           ),
-          RaisedButton(
-            child: Text('SEE JOINING REQUESTS'),
-            onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context)=>RequestsPage(requestsList: requestsList,)));
-            },
+          Row(
+            children: <Widget>[
+              RaisedButton(
+                child: Text('SEE JOINING REQUESTS'),
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context)=>RequestsPage(requestsList: requestsList,)));
+                },
+              ),
+              RaisedButton(
+                child: Text('Chat'),
+                onPressed: (){
+                  Navigator.push(context, MaterialPageRoute(
+                    builder: (context)=>ChatScreen(source: widget.source,roomId: widget.roomId,)
+                  ));
+                },
+              )
+            ],
           ),
         ],
       ),
@@ -142,6 +154,93 @@ class RequestsPage extends StatelessWidget {
         child: ListView(
           children: requestsList,
         ),
+      ),
+    );
+  }
+}
+
+class ChatScreen extends StatefulWidget {
+  final String source,roomId;
+  ChatScreen({this.source,this.roomId});
+  @override
+  _ChatScreenState createState() => _ChatScreenState();
+}
+
+class _ChatScreenState extends State<ChatScreen> {
+
+  List<MessageBubble> messagesList = [
+  ];
+
+
+  void fetchChatMessages() async{
+    await for(var snapshot in _firestore.collection(widget.source).document(widget.roomId).collection('chatMessages').snapshots())
+    {
+      List<MessageBubble> newList = [];
+      for(var message in snapshot.documents)
+      {
+        print(message.data);
+        String textMsg,sender;
+        textMsg=message.data['text'];
+        sender=message.data['sender'];
+        newList.add(MessageBubble(text: textMsg,sender: sender,isMe: sender==JourneyPlanScreen.username,));
+      }
+      setState(() {
+        messagesList=newList;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchChatMessages();
+  }
+  String text;
+
+  @override
+  Widget build(BuildContext context) {
+    TextEditingController controller = TextEditingController();
+    return Scaffold(
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Expanded(
+            flex: 5,
+            child: ListView.builder(
+              itemCount: messagesList.length,
+              itemBuilder: (context,index){
+                return messagesList[index];
+              },
+            ),
+          ),
+          Expanded(
+            child: Container(
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                    child: TextField(
+                      onChanged: (value){
+                        text = value;
+                      },
+                      controller: controller,
+                    ),
+                  ),
+                  RaisedButton(
+                    child: Text('Send'),
+                    onPressed: (){
+                      //SEND MESSAGE
+                      controller.clear();
+                      Firestore.instance.collection(widget.source).document(widget.roomId).collection('chatMessages').add({
+                        'text':text,
+                        'sender':JourneyPlanScreen.username,
+                      });
+                    },
+                  )
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

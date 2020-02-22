@@ -17,6 +17,6 @@ const kSPuid = 'userId';
 const kSPfirstLogIn='firstLogIn';
 
 const kJoinRequest = 'Join Request';
-const kConfirmJoin = 'Confirm';
+const kConfirmJoin = 'Confirm To Join';
 const kPendingRequest = 'Pending Request';
-const kRejectedRequest = 'RejectedRequest';
+const kRejectedRequest = 'Rejected Request';
