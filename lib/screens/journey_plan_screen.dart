@@ -5,17 +5,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:scab_flutter/constants.dart';
 import 'package:scab_flutter/resources/objects.dart';
+import 'package:scab_flutter/screens/intro_screen.dart';
 import 'package:scab_flutter/screens/room_search_screen.dart';
 import 'package:scab_flutter/screens/show_profile.dart';
 
 User _user = User();
 bool loadingUserData;
-String source,destination;
+String _source,_destination;
 int hour,minutes;
 
 class JourneyPlanScreen extends StatefulWidget {
   static String id = 'journey_plan';
-
   final String mUid;
   JourneyPlanScreen({this.mUid});
 
@@ -25,7 +25,7 @@ class JourneyPlanScreen extends StatefulWidget {
 
 class _JourneyPlanScreenState extends State<JourneyPlanScreen> {
 
-  void getUserProfileData() async {
+  void fetchUserProfileData() async {
     final _firestore= Firestore.instance;
     var document = await _firestore.collection('users').document(widget.mUid).get();
     print(document.data);
@@ -47,7 +47,8 @@ class _JourneyPlanScreenState extends State<JourneyPlanScreen> {
   void initState() {
     super.initState();
     loadingUserData=true;
-    getUserProfileData();
+    fetchUserProfileData();
+    IntroScreen.getUid()??IntroScreen.setUid(_user.uid);//Setting uid to IntroScreen during first Login
   }
 
   @override
@@ -90,12 +91,12 @@ class _JourneyPlanScreenState extends State<JourneyPlanScreen> {
                   'From',
                   style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                 ),
-                getSourceDropDownButton(),
+                get_sourceDropDownButton(),
                 Text(
                   'To',
                   style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                 ),
-                getDestinationDropDownButton(),
+                get_destinationDropDownButton(),
                 Row(
                   children: <Widget>[
                     Text('TIME'),
@@ -116,7 +117,7 @@ class _JourneyPlanScreenState extends State<JourneyPlanScreen> {
                 RaisedButton(
                   child: Text('Search Rides'),
                   onPressed: (){
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=>RoomSearch(user: _user,)));
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>RoomSearch(user: _user,source: _source,destination: _destination,)));
                   },
                 ),
               ],
@@ -128,7 +129,7 @@ class _JourneyPlanScreenState extends State<JourneyPlanScreen> {
     );
   }
 
-  DropdownButton<String> getSourceDropDownButton() {
+  DropdownButton<String> get_sourceDropDownButton() {
     List <DropdownMenuItem<String>> dropDownMenuItems = [];
     for (String event in placesList) {
       var newItem = DropdownMenuItem(
@@ -138,16 +139,16 @@ class _JourneyPlanScreenState extends State<JourneyPlanScreen> {
       dropDownMenuItems.add(newItem);
     }
     return DropdownButton<String>(
-        value: source,
+        value: _source,
         items: dropDownMenuItems,
         onChanged: (value){
           setState(() {
-            source = value;
-            print(source);
+            _source = value;
+            print(_source);
           });
         });
   }
-  DropdownButton<String> getDestinationDropDownButton() {
+  DropdownButton<String> get_destinationDropDownButton() {
     List <DropdownMenuItem<String>> dropDownMenuItems = [];
     for (String event in placesList) {
       var newItem = DropdownMenuItem(
@@ -157,12 +158,12 @@ class _JourneyPlanScreenState extends State<JourneyPlanScreen> {
       dropDownMenuItems.add(newItem);
     }
     return DropdownButton<String>(
-        value: destination,
+        value: _destination,
         items: dropDownMenuItems,
         onChanged: (value){
           setState(() {
-            destination = value;
-            print(destination);
+            _destination = value;
+            print(_destination);
           });
         });
   }

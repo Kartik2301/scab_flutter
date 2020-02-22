@@ -9,6 +9,10 @@ String _uid;
 
 class IntroScreen extends StatefulWidget {
   static String getUid()=>_uid;
+  static void setUid(String uid){
+    _uid= uid;
+  }
+
   @override
   _IntroScreenState createState() => _IntroScreenState();
 }
@@ -28,17 +32,54 @@ class _IntroScreenState extends State<IntroScreen> {
   }
   @override
   Widget build(BuildContext context) {
+    final controller = PageController(
+      initialPage: 0,
+    );
     return Scaffold(
-      body: Center(
-        child: RaisedButton(
-            onPressed: (){
-              Navigator.push(context, MaterialPageRoute(
-                builder: (context)=>_firstLogIn?LoginPage():JourneyPlanScreen(mUid: _uid,),
-              ));
-            },
-            child: Text('Skip')
-        ),
+      body: Column(
+        children: <Widget>[
+          Flexible(
+            flex: 10,
+            child: PageView(
+              controller: controller,
+              children: <Widget>[
+                IntroImage('introscreen1.png'),
+                IntroImage('introscreen1.png'),
+                IntroImage('introscreen1.png'),
+              ],
+            ),
+          ),
+          Center(
+            child: RaisedButton(
+                onPressed: (){
+                  Navigator.push(context, MaterialPageRoute(
+                    builder: (context)=>_firstLogIn?LoginPage():JourneyPlanScreen(mUid: _uid,),
+                  ));
+                },
+                child: Text('Skip')
+            ),
+          ),
+        ],
       ),
+    );
+  }
+}
+
+class IntroImage extends StatelessWidget {
+  final String introImage;
+  IntroImage(this.introImage);
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Scaffold(
+          body: Center(
+            child: Image(
+              image: AssetImage('images/$introImage'),
+              height: 400,
+              width: 400,
+            ),
+          )),
     );
   }
 }

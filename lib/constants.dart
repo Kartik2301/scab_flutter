@@ -15,3 +15,8 @@ var minuteList = new List<int>.generate(60, (i) => i + 1);
 
 const kSPuid = 'userId';
 const kSPfirstLogIn='firstLogIn';
+
+const kJoinRequest = 'Join Request';
+const kConfirmJoin = 'Confirm';
+const kPendingRequest = 'Pending Request';
+const kRejectedRequest = 'RejectedRequest';

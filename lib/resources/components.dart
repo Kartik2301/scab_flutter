@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:scab_flutter/constants.dart';
 import 'package:scab_flutter/screens/intro_screen.dart';
 
+import 'objects.dart';
+
 class DetailInputWidget extends StatelessWidget {
   final String detailName;
 
@@ -29,8 +31,8 @@ class DetailInputWidget extends StatelessWidget {
 
 
 class RoomCard extends StatelessWidget {
-  final String source,destination,roomOwner,ownerRoll,roomId;
-  RoomCard({this.source,this.destination,this.roomOwner,this.ownerRoll,this.roomId});
+  final String source,destination,roomOwner,ownerRoll,roomId,joiningStatus;
+  RoomCard({this.source,this.destination,this.roomOwner,this.ownerRoll,this.roomId,this.joiningStatus});
 
   @override
   Widget build(BuildContext context) {
@@ -47,10 +49,10 @@ class RoomCard extends StatelessWidget {
                 Text('Room Owner',style: TextStyle(fontSize: 18),),
                 Column(
                   children: <Widget>[
-                    Text(roomOwner,style: TextStyle(fontSize: 22,fontWeight: FontWeight.bold),),
+                    Text(roomOwner??'NA',style: TextStyle(fontSize: 22,fontWeight: FontWeight.bold),),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Text(ownerRoll),
+                      child: Text(ownerRoll??'NA'),
                     )
                   ],
                 ),
@@ -59,26 +61,27 @@ class RoomCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                Text(source,style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),),
+                Text(source??'NA',style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),),
                 //TODO:Icons to be added here
-                Text(destination,style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),)
+                Text(destination??'NA',style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),)
               ],
             ),
             //TODO: Time Row Here
             RaisedButton(
               color: Colors.black,
-              child: Text('Join Request',style: TextStyle(color: Colors.white),),
+              child: Text(joiningStatus??'Join Request',style: TextStyle(color: Colors.white),),
               onPressed: (){
                 //TODO:Send Joining Requests
-                print(roomId);
                 Firestore.instance.collection(source).document(roomId).collection('requests').document(IntroScreen.getUid()).setData({
-                  'status': 'PENDING',
+                  'status': kPendingRequest,
                   'uid' : IntroScreen.getUid(),
+                  'createdAt': Timestamp.now(),
                 });
                 Firestore.instance.collection('users').document(IntroScreen.getUid()).collection('myRooms').document(roomId).setData({
-                  'status': "PENDING",
+                  'status': kPendingRequest,
+                  'roomId':roomId,
+                  'createdAt': Timestamp.now(),
                 });
-
               },
             ),
           ],
@@ -115,11 +118,11 @@ class RequestCard extends StatelessWidget {
                   child: Text('Accept'),
                   onPressed: (){
                     //TODO: Implement Accept Functionality
-                    Firestore.instance.collection(source).document(roomId).collection('requests').document(requestedUID).setData({
-                      'status': "ACCEPTED"
+                    Firestore.instance.collection(source).document(roomId).collection('requests').document(requestedUID).updateData({
+                      'status': "ACCEPTED",
                     });
-                    Firestore.instance.collection('users').document(requestedUID).collection('myRooms').document(roomId).setData({
-                      'status': "ACCEPTED"
+                    Firestore.instance.collection('users').document(requestedUID).collection('myRooms').document(roomId).updateData({
+                      'status': "ACCEPTED",
                     });
                   },
                 ),
@@ -127,11 +130,11 @@ class RequestCard extends StatelessWidget {
                   child: Text('Decline'),
                   onPressed: (){
                     //TODO: Implement Reject Functionality
-                    Firestore.instance.collection(source).document(roomId).collection('requests').document(requestedUID).setData({
-                      'status': "REJECTED"
+                    Firestore.instance.collection(source).document(roomId).collection('requests').document(requestedUID).updateData({
+                      'status': kRejectedRequest,
                     });
-                    Firestore.instance.collection('users').document(requestedUID).collection('myRooms').document(roomId).setData({
-                      'status': "REJECTED"
+                    Firestore.instance.collection('users').document(requestedUID).collection('myRooms').document(roomId).updateData({
+                      'status': kRejectedRequest,
                     });
                   },
                 ),
@@ -145,3 +148,35 @@ class RequestCard extends StatelessWidget {
   }
 }
 
+class MemberCard extends StatelessWidget {
+
+  final User _user;
+  final String designation;
+  MemberCard(this._user,{this.designation});
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Container(
+        height: 100,
+        color: Colors.grey[300],
+        child: ListTile(
+          leading: CircleAvatar(
+            child: Image.network(_user.imageUrl??'https://avatars2.githubusercontent.com/u/46641571?s=400&u=f758fa76ddf23047aa50eeef64d34bea49933850&v=4'),
+          ),
+          title: Text(_user.fullName),
+          subtitle: Text(designation),
+          trailing: Container(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text(_user.rollNo),
+                Text(_user.gender)
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

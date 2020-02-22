@@ -14,7 +14,7 @@ class Room{//Total 7 Fields
   //All stored in Database
   String roomId;
   //time denotes room creation time
-  String time;
+  String createdAt;
   String source;
   String destination;
   String journeyTime;
