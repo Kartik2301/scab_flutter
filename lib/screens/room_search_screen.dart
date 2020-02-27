@@ -109,16 +109,20 @@ class _RoomSearchState extends State<RoomSearch> {
     print(roomId);
     _firestore.collection(_source).document(roomId).updateData({'roomId': roomId});
 
-    _firestore.collection(_source).document(roomId).collection('members').document(_user.uid).setData({
-      //'uid':_user.uid,
-      'fullName':_user.fullName,
-      'rollNo':_user.rollNo,
-      'imageUrl':_user.imageUrl,
-      'gender':_user.gender,
-      'phoneNumber':_user.phoneNumber,
+//    _firestore.collection(_source).document(roomId).collection('members').document(_user.uid).setData({
+//      //'uid':_user.uid,
+//      'fullName':_user.fullName,
+//      'rollNo':_user.rollNo,
+//      'imageUrl':_user.imageUrl,
+//      'gender':_user.gender,
+//      'phoneNumber':_user.phoneNumber,
+//    });
+//
+    _firestore.collection(_source).document(roomId).updateData({
+      'member1': IntroScreen.getUid(),
     });
 
-    Navigator.push(context, MaterialPageRoute(builder: (context)=>InRoom(roomId: roomId,source: _source,destination: _destination,isOwner: true,)));
+    Navigator.push(context, MaterialPageRoute(builder: (context)=>InRoom(roomId: roomId,source: _source,destination: _destination,isOwner: true,introduce: true,)));
   }
 
   @override

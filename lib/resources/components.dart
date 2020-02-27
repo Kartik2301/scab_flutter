@@ -92,20 +92,33 @@ class RoomCard extends StatelessWidget {
                 }
                 else if(joiningStatus==kConfirmJoin)
                   {
-                    print(roomId);
-                    Firestore.instance.collection(source).document(roomId)
-                        .updateData({
-                    'newUser': IntroScreen.getUid(),
-                    });
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=>InRoom(
-                      source: source,
-                      destination: destination,
-                      isOwner: false,
-                      roomId: roomId,
-                    )));
+                    //TODO: Add new member in the room
+                      Firestore.instance.collection(source).document(roomId).get().then((value){
+                        print('value + ${value.data}');
+                        int numberOfMembers = value.data['numberOfMembers'];
+                        if(numberOfMembers<4)
+                          {
+                            Firestore.instance.collection(source).document(roomId).updateData({
+                              'member${numberOfMembers+1}': IntroScreen.getUid(),
+                              'numberOfMembers': numberOfMembers+1,
+                            });
+
+                            Navigator.push(context, MaterialPageRoute(builder: (context)=>InRoom(
+                              source: source,
+                              destination: destination,
+                              isOwner: false,
+                              roomId: roomId,
+                              introduce: true,
+                            )));
+                          }
+                        else
+                          {
+                            //TODO: Show a toast that room is full now
+                          }
+                      });
                   }
                 else{
-                  //Do nothing when requests is pending
+                  //TODO: Show a Toast
                   }
               },
             ),
@@ -213,7 +226,6 @@ class MessageBubble extends StatelessWidget {
   final String text;
   final String sender;
   final bool isMe;
-
 
   MessageBubble({this.text, this.sender,this.isMe});
 

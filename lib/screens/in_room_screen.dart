@@ -10,26 +10,20 @@ final _firestore = Firestore.instance;
 
 class InRoom extends StatefulWidget {
   final String roomId,source,destination;
-  final bool isOwner;
+  final bool isOwner,introduce;
 
-  InRoom({@required this.roomId,@required this.source,@required this.destination,@required this.isOwner});
+  InRoom({@required this.roomId,@required this.source,@required this.destination,@required this.isOwner,this.introduce});
 
   @override
   _InRoomState createState() => _InRoomState();
 }
-
 class _InRoomState extends State<InRoom> {
 
   List<MemberCard> membersList = [];
-
-  List<RequestCard> requestsList=[
-    RequestCard(
-      requestedUID: "FAKE",
-      source: 'JAHANUM',
-      roomId: 'FUCK',
-      status: 'Fake',
-    ),
-  ];
+  List<RequestCard> requestsList=[];
+  User member1,member2,member3,member4;
+  int numberOfMembers=0;
+  List<MessageBubble> messagesList = [];
 
   Future<User> fetchMemberProfile(String uid) async{
     User _user = User();
@@ -50,12 +44,7 @@ class _InRoomState extends State<InRoom> {
   {
     await for(var snapshot in _firestore.collection(widget.source).document(widget.roomId).collection('requests').snapshots())
     {
-      List<RequestCard> updatedRoomsList = [RequestCard(
-        requestedUID: "FAKE",
-        source: 'JAHANUM',
-        roomId: 'FUCK',
-        status: 'FAKE',
-      ),];
+      List<RequestCard> updatedRoomsList = [];
       for(var message in snapshot.documents)
       {
         String requestedUid,status;
@@ -70,19 +59,38 @@ class _InRoomState extends State<InRoom> {
     }
   }
 
-  void setOwner() async{
-      User user = await fetchMemberProfile(IntroScreen.getUid());
+  void setMembers() async{
+    await for(var snapshot in _firestore.collection(widget.source).document(widget.roomId).snapshots()){
+      print("Doc Updated ${snapshot.data}");
+      numberOfMembers = snapshot.data['numberOfMembers'];
+      List<MemberCard> newList=[];
+      for(int i=1;i<=numberOfMembers;i++){
+        User user = await fetchMemberProfile(snapshot.data['member$i']);
+        newList.add(MemberCard(user,designation: i==1?'Owner':widget.destination,));
+      }
       setState(() {
-        membersList.add(MemberCard(user,designation: 'Owner',));
+        membersList=newList;
       });
+    }
+
+  }
+
+  void chatIntroduction(){
+    Firestore.instance.collection(widget.source).document(widget.roomId).collection('chatMessages').add({
+      'sender':JourneyPlanScreen.username,
+      'type': kIntroType,
+      'senderUid': IntroScreen.getUid(),
+      'createdAt': Timestamp.now(),
+    });
   }
 
   @override
   void initState() {
     super.initState();
     fetchRequests();
-    if(widget.isOwner){
-      setOwner();
+    setMembers();
+    if(widget.introduce){
+      chatIntroduction();
     }
   }
 
@@ -100,6 +108,7 @@ class _InRoomState extends State<InRoom> {
                   padding: const EdgeInsets.all(32.0),
                   child: Text(widget.source),
                 ),
+                Text('Members: $numberOfMembers'),
                 Padding(
                   padding: const EdgeInsets.all(32.0),
                   child: Text(widget.destination),
@@ -168,21 +177,30 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
 
-  List<MessageBubble> messagesList = [
-  ];
-
+  List<MessageBubble> messagesList = [];
 
   void fetchChatMessages() async{
-    await for(var snapshot in _firestore.collection(widget.source).document(widget.roomId).collection('chatMessages').snapshots())
+    await for(var snapshot in _firestore.collection(widget.source).document(widget.roomId).collection('chatMessages').orderBy('createdAt').snapshots())
     {
       List<MessageBubble> newList = [];
       for(var message in snapshot.documents)
       {
-        print(message.data);
-        String textMsg,sender;
+        String textMsg,sender,type,senderUid;
         textMsg=message.data['text'];
         sender=message.data['sender'];
-        newList.add(MessageBubble(text: textMsg,sender: sender,isMe: sender==JourneyPlanScreen.username,));
+        type=message.data['type'];
+        senderUid=message.data['senderUid'];
+        if(type==kMessageType) {
+          newList.add(MessageBubble(text: textMsg,
+            sender: sender,
+            isMe: senderUid == IntroScreen.getUid(),));
+        }
+        else if (type==kIntroType){
+            newList.add(MessageBubble(
+              text: '$sender has joined the room',
+              sender: sender,
+              isMe: false,));
+          }
       }
       setState(() {
         messagesList=newList;
@@ -196,7 +214,6 @@ class _ChatScreenState extends State<ChatScreen> {
     fetchChatMessages();
   }
   String text;
-
   @override
   Widget build(BuildContext context) {
     TextEditingController controller = TextEditingController();
@@ -233,6 +250,9 @@ class _ChatScreenState extends State<ChatScreen> {
                       Firestore.instance.collection(widget.source).document(widget.roomId).collection('chatMessages').add({
                         'text':text,
                         'sender':JourneyPlanScreen.username,
+                        'type': kMessageType,
+                        'senderUid': IntroScreen.getUid(),
+                        'createdAt':Timestamp.now(),
                       });
                     },
                   )

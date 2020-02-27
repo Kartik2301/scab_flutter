@@ -20,3 +20,6 @@ const kJoinRequest = 'Join Request';
 const kConfirmJoin = 'Confirm To Join';
 const kPendingRequest = 'Pending Request';
 const kRejectedRequest = 'Rejected Request';
+
+const kMessageType='msg';
+const kIntroType='intro';
