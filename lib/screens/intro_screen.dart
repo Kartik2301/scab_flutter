@@ -44,8 +44,8 @@ class _IntroScreenState extends State<IntroScreen> {
               controller: controller,
               children: <Widget>[
                 IntroImage('introscreen1.png'),
-                IntroImage('introscreen1.png'),
-                IntroImage('introscreen1.png'),
+                IntroImage('introscreen2.png'),
+                IntroImage('introscreen3.png'),
               ],
             ),
           ),
@@ -74,10 +74,13 @@ class IntroImage extends StatelessWidget {
     return SafeArea(
       child: Scaffold(
           body: Center(
-            child: Image(
-              image: AssetImage('images/$introImage'),
-              height: 400,
-              width: 400,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Image(
+                image: AssetImage('images/$introImage'),
+                height: 400,
+                width: 400,
+              ),
             ),
           )),
     );
