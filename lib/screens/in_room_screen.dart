@@ -42,7 +42,7 @@ class _InRoomState extends State<InRoom> {
 
   void fetchRequests () async
   {
-    await for(var snapshot in _firestore.collection(widget.source).document(widget.roomId).collection('requests').snapshots())
+    await for(var snapshot in _firestore.collection('places').document(widget.source).collection('rooms').document(widget.roomId).collection('requests').snapshots())
     {
       List<RequestCard> updatedRoomsList = [];
       for(var message in snapshot.documents)
@@ -60,7 +60,7 @@ class _InRoomState extends State<InRoom> {
   }
 
   void setMembers() async{
-    await for(var snapshot in _firestore.collection(widget.source).document(widget.roomId).snapshots()){
+    await for(var snapshot in _firestore.collection('places').document(widget.source).collection('rooms').document(widget.roomId).snapshots()){
       print("Doc Updated ${snapshot.data}");
       numberOfMembers = snapshot.data['numberOfMembers'];
       List<MemberCard> newList=[];
@@ -76,7 +76,7 @@ class _InRoomState extends State<InRoom> {
   }
 
   void chatIntroduction(){
-    Firestore.instance.collection(widget.source).document(widget.roomId).collection('chatMessages').add({
+    Firestore.instance.collection('places').document(widget.source).collection('rooms').document(widget.roomId).collection('chatMessages').add({
       'sender':JourneyPlanScreen.username,
       'type': kIntroType,
       'senderUid': IntroScreen.getUid(),
@@ -180,7 +180,7 @@ class _ChatScreenState extends State<ChatScreen> {
   List<MessageBubble> messagesList = [];
 
   void fetchChatMessages() async{
-    await for(var snapshot in _firestore.collection(widget.source).document(widget.roomId).collection('chatMessages').orderBy('createdAt').snapshots())
+    await for(var snapshot in _firestore.collection('places').document(widget.source).collection('rooms').document(widget.roomId).collection('chatMessages').orderBy('createdAt').snapshots())
     {
       List<MessageBubble> newList = [];
       for(var message in snapshot.documents)
@@ -247,7 +247,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     onPressed: (){
                       //SEND MESSAGE
                       controller.clear();
-                      Firestore.instance.collection(widget.source).document(widget.roomId).collection('chatMessages').add({
+                      Firestore.instance.collection('places').document(widget.source).collection('rooms').document(widget.roomId).collection('chatMessages').add({
                         'text':text,
                         'sender':JourneyPlanScreen.username,
                         'type': kMessageType,

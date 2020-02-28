@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:scab_flutter/constants.dart';
 import 'package:scab_flutter/screens/in_room_screen.dart';
 import 'package:scab_flutter/screens/intro_screen.dart';
@@ -131,8 +132,7 @@ class RoomCard extends StatelessWidget {
                   Firestore.instance.collection(source).document(roomId).get().then((value){
                     print('value + ${value.data}');
                     int numberOfMembers = value.data['numberOfMembers'];
-                    if(numberOfMembers<4)
-                    {
+                    if(numberOfMembers<4) {
                       Firestore.instance.collection(source).document(roomId).updateData({
                         'member${numberOfMembers+1}': IntroScreen.getUid(),
                         'numberOfMembers': numberOfMembers+1,
@@ -146,14 +146,13 @@ class RoomCard extends StatelessWidget {
                         introduce: true,
                       )));
                     }
-                    else
-                    {
-                      //TODO: Show a toast that room is full now
+                    else {
+                      Fluttertoast.showToast(msg: 'Sorry, the room is full now!');
                     }
                   });
                 }
                 else{
-                  //TODO: Show a Toast
+                  Fluttertoast.showToast(msg: 'Already Requested! Please wait while the owner accepts the request');
                 }
               },
             ),

@@ -29,7 +29,7 @@ class _RoomSearchState extends State<RoomSearch> {
     {
       Room room = Room();
       try{
-        var document = await _firestore.collection(_source).document(roomId).get();
+        var document = await _firestore.collection('places').document(_source).collection('rooms').document(roomId).get();
         print(document.data);
         room.source = document.data['source']??'Source Unavailable';
         room.destination =document.data['destination']??'Destination Unavailable';
@@ -71,7 +71,7 @@ class _RoomSearchState extends State<RoomSearch> {
   }
 
   void fetchRooms() async{
-    await for(var snapshot in _firestore.collection(_source).orderBy('createdAt', descending: true).snapshots())
+    await for(var snapshot in _firestore.collection('places').document(_source).collection('rooms').orderBy('createdAt', descending: true).snapshots())
     {
       List<RoomCard> updatedRoomsList = [];
       for(var message in snapshot.documents)
@@ -95,7 +95,7 @@ class _RoomSearchState extends State<RoomSearch> {
   void createRoom()async{
     //TODO: Implement Firebase Room Creation
     String roomId;
-    DocumentReference ref = await _firestore.collection(_source)
+    DocumentReference ref = await _firestore.collection('places').document(_source).collection('rooms')
         .add({
       'destination': _destination,
       'source':_source,
@@ -106,8 +106,8 @@ class _RoomSearchState extends State<RoomSearch> {
     });
     roomId=ref.documentID;
     print(roomId);
-    _firestore.collection(_source).document(roomId).updateData({'roomId': roomId});
-    _firestore.collection(_source).document(roomId).updateData({
+    _firestore.collection('places').document(_source).collection('rooms').document(roomId).updateData({'roomId': roomId});
+    _firestore.collection('places').document(_source).collection('rooms').document(roomId).updateData({
       'member1': IntroScreen.getUid(),
     });
 
