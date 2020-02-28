@@ -3,11 +3,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:scab_flutter/constants.dart';
 import 'package:scab_flutter/resources/objects.dart';
 import 'package:scab_flutter/screens/intro_screen.dart';
 import 'package:scab_flutter/screens/room_search_screen.dart';
 import 'package:scab_flutter/screens/show_profile.dart';
+import 'package:scab_flutter/resources/components.dart';
 
 User _user = User();
 bool loadingUserData;
@@ -51,6 +53,7 @@ class _JourneyPlanScreenState extends State<JourneyPlanScreen> {
     loadingUserData=true;
     fetchUserProfileData();
     IntroScreen.getUid()??IntroScreen.setUid(_user.uid);//Setting uid to IntroScreen during first Login
+    Fluttertoast.showToast(msg: 'UID: ${IntroScreen.getUid()}');
   }
 
   @override
@@ -60,45 +63,36 @@ class _JourneyPlanScreenState extends State<JourneyPlanScreen> {
       child: SafeArea(
         child: Scaffold(
           body: Padding(
-            padding: const EdgeInsets.all(32.0),
+            padding: EdgeInsets.symmetric(vertical: 32,horizontal: 8),
             child: Column(
+              mainAxisSize: MainAxisSize.max,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                RaisedButton(
-                  color: loadingUserData?Colors.grey:kThemeColor,
-                  child: Text('SHOW PROFILE'),
-                  onPressed: (){
-                    loadingUserData? print('Please Wait'):Navigator.push(context, MaterialPageRoute(builder: (context)=>ShowProfile(_user)));
-                  },
-                ),
+                TitleRow(title: 'Create a Ride'),
+                SizedBox(height: 80,),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    Icon(
-                      Icons.card_giftcard,
-                      size: 40,
+                    Image(
+                      height: 140,
+                      image: AssetImage('images/maps_markers.png'),
                     ),
-                    SizedBox(
-                      width: 15.0,
+                    SizedBox(width: 40,),
+                    Column(
+                      children: <Widget>[
+                        Container(
+                          color: Colors.grey[100],
+                          child: get_sourceDropDownButton(),
+                        ),
+                        SizedBox(height: 50,),
+                        Container(
+                          color: Colors.grey[100],
+                          child: get_destinationDropDownButton(),
+                        ),
+                      ],
                     ),
-                    Text(
-                      'Search Ride',
-                      style: TextStyle(
-                          color: kThemeColor,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 30),
-                    )
                   ],
                 ),
-                Text(
-                  'From',
-                  style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-                ),
-                get_sourceDropDownButton(),
-                Text(
-                  'To',
-                  style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-                ),
-                get_destinationDropDownButton(),
                 Row(
                   children: <Widget>[
                     Text('TIME'),
@@ -116,12 +110,31 @@ class _JourneyPlanScreenState extends State<JourneyPlanScreen> {
                     ),
                   ],
                 ),
-                RaisedButton(
-                  child: Text('Search Rides'),
+                BottomLargeButton(
+                  text: 'Show Profile',
                   onPressed: (){
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=>RoomSearch(user: _user,source: _source,destination: _destination,)));
+                    loadingUserData? print('Please Wait'):Navigator.push(context, MaterialPageRoute(builder: (context)=>ShowProfile(_user)));
                   },
                 ),
+                SizedBox(
+                  height: 30,
+                ),
+                BottomLargeButton(
+                    text: 'Search Ride',
+                    onPressed: () {
+                      if(_source==null||_destination==null)
+                        {
+                          Fluttertoast.showToast(
+                              msg: "Please Enter the Ride Details"
+                          );
+                        }
+                      else {
+                        Navigator.push(context, MaterialPageRoute
+                          (builder: (context) => RoomSearch(user: _user,
+                          source: _source,
+                          destination: _destination,)));
+                      }
+                }),
               ],
 
             ),

@@ -23,7 +23,6 @@ class _RoomSearchState extends State<RoomSearch> {
   List<RoomCard> roomsList = [];
   List<RoomCard> myRoomsList = [];
 
-
   void fetchRequestedRoomsStatus () async
   {
     Future<Room> fetchRoomDetails(String roomId) async
@@ -108,16 +107,6 @@ class _RoomSearchState extends State<RoomSearch> {
     roomId=ref.documentID;
     print(roomId);
     _firestore.collection(_source).document(roomId).updateData({'roomId': roomId});
-
-//    _firestore.collection(_source).document(roomId).collection('members').document(_user.uid).setData({
-//      //'uid':_user.uid,
-//      'fullName':_user.fullName,
-//      'rollNo':_user.rollNo,
-//      'imageUrl':_user.imageUrl,
-//      'gender':_user.gender,
-//      'phoneNumber':_user.phoneNumber,
-//    });
-//
     _firestore.collection(_source).document(roomId).updateData({
       'member1': IntroScreen.getUid(),
     });
@@ -139,47 +128,56 @@ class _RoomSearchState extends State<RoomSearch> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: kThemeColor,
-        title: Text('Search Rooms'),
-      ),
-        body: Column(
-          children: <Widget>[
-            Row(
-              children: <Widget>[
-                FlatButton(
-                  child: Text('All Rooms'),
-                  onPressed: (){
-                    setState(() {
-                      allRooms=true;
-                    });
+        body: Padding(
+          padding: EdgeInsets.symmetric(vertical: 32,horizontal: 8),
+          child: Column(
+            children: <Widget>[
+              TitleRow(title: 'Rides',),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  RaisedButton(
+                    color: Colors.white,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 32,vertical: 16),
+                      child: Text('All Rooms'),
+                    ),
+                    onPressed: (){
+                      setState(() {
+                        allRooms=true;
+                      });
+                    },
+                  ),
+                  RaisedButton(
+                    color: Colors.white,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 32,vertical: 16),
+                      child: Text('My Rooms'),
+                    ),
+                    onPressed: (){
+                      setState(() {
+                        allRooms=false;
+                      });
+                    },
+                  ),
+                ],
+              ),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: allRooms?roomsList.length:myRoomsList.length,
+                  itemBuilder: (context,index){
+                    return allRooms?roomsList[index]:myRoomsList[index];
                   },
                 ),
-                FlatButton(
-                  child: Text('My Rooms'),
-                  onPressed: (){
-                    setState(() {
-                      allRooms=false;
-                    });
-                  },
+              ),
+              Container(
+                child: RaisedButton(
+                  child: Text('CREATE'),
+                  onPressed: createRoom,
                 ),
-              ],
-            ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: allRooms?roomsList.length:myRoomsList.length,
-                itemBuilder: (context,index){
-                  return allRooms?roomsList[index]:myRoomsList[index];
-                },
               ),
-            ),
-            Container(
-              child: RaisedButton(
-                child: Text('CREATE'),
-                onPressed: createRoom,
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
     );
   }

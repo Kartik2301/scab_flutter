@@ -1,6 +1,9 @@
 import 'package:flutter/cupertino.dart';
 
 Color kThemeColor = Color(0xFF4DB86F);
+Color kPrimaryColor = Color(0xFF8FD694);
+Color kBlack = Color(0xFF000000);
+Color kRed = Color(0xFFF72C25);
 
 List<String> placesList = [
   'IIIT-A',

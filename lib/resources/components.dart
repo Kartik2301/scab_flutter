@@ -37,44 +37,79 @@ class RoomCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Card(
-        elevation: 5,
-        child: Column(
-          children: <Widget>[
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+          bottomLeft: Radius.circular(10),
+          bottomRight: Radius.circular(10),
+
+        ),
+    ),
+      elevation: 5,
+      child: Column(
+        children: <Widget>[
+          Padding(
+            padding: EdgeInsets.only(left: 16,right: 16,top: 16),
+            child: Column(
               children: <Widget>[
-                Text('Room Owner',style: TextStyle(fontSize: 18),),
-                Column(
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    Text(roomOwner??'NA',style: TextStyle(fontSize: 22,fontWeight: FontWeight.bold),),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(ownerRoll??'NA'),
-                    )
+                    Text('Room Owner',style: TextStyle(fontSize: 18),),
+                    Column(
+                      children: <Widget>[
+                        Text(roomOwner??'NA',style: TextStyle(fontSize: 22,fontWeight: FontWeight.bold),),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(ownerRoll??'NA'),
+                        )
+                      ],
+                    ),
                   ],
                 ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Expanded(child: Text(source??'NA',style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),)),
+                    Image(
+                      height: 20,
+                      image: AssetImage('images/horizontal_markers.png',),
+                    ),
+                    Expanded(child: Text(destination??'NA',style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),))
+                  ],
+                ),
+                Padding(
+                  padding:EdgeInsets.symmetric(vertical: 8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Text('Time: 4:00 PM',style: TextStyle(fontSize: 10),),
+                      Text('4 hrs left',style: TextStyle(fontSize: 10,color: kRed,fontWeight: FontWeight.bold),),
+                      Text('Members: 1',style: TextStyle(fontSize: 10),)
+                    ],
+                  ),
+                )
               ],
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                Text(source??'NA',style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),),
-                //TODO:Icons to be added here
-                Text(destination??'NA',style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),)
-              ],
+          ),
+          Container(
+            decoration: BoxDecoration(
+                color: joiningStatus==kJoinRequest?Colors.black:(joiningStatus==kConfirmJoin?kThemeColor:kRed),
+                borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(10),
+                bottomRight: Radius.circular(10),
+              )
             ),
-            //TODO: Time Row Here
-            RaisedButton(
-              color: joiningStatus==kJoinRequest?Colors.black:(joiningStatus==kConfirmJoin?kThemeColor:Colors.red),
+            width: double.infinity,
+            child: FlatButton(
+              color: joiningStatus==kJoinRequest?Colors.black:(joiningStatus==kConfirmJoin?kThemeColor:kRed),
               child: Text(joiningStatus??kJoinRequest,style: TextStyle(color: Colors.white),),
               onPressed: (){
-
                 if(joiningStatus==kJoinRequest) {
-                  //TODO:Send Joining Requests
+                  //Send Joining Requests
                   Firestore.instance.collection(source).document(roomId)
                       .collection('requests').document(IntroScreen.getUid())
                       .setData({
@@ -91,39 +126,39 @@ class RoomCard extends StatelessWidget {
                   });
                 }
                 else if(joiningStatus==kConfirmJoin)
-                  {
-                    //TODO: Add new member in the room
-                      Firestore.instance.collection(source).document(roomId).get().then((value){
-                        print('value + ${value.data}');
-                        int numberOfMembers = value.data['numberOfMembers'];
-                        if(numberOfMembers<4)
-                          {
-                            Firestore.instance.collection(source).document(roomId).updateData({
-                              'member${numberOfMembers+1}': IntroScreen.getUid(),
-                              'numberOfMembers': numberOfMembers+1,
-                            });
-
-                            Navigator.push(context, MaterialPageRoute(builder: (context)=>InRoom(
-                              source: source,
-                              destination: destination,
-                              isOwner: false,
-                              roomId: roomId,
-                              introduce: true,
-                            )));
-                          }
-                        else
-                          {
-                            //TODO: Show a toast that room is full now
-                          }
+                {
+                  //Add new member in the room
+                  Firestore.instance.collection(source).document(roomId).get().then((value){
+                    print('value + ${value.data}');
+                    int numberOfMembers = value.data['numberOfMembers'];
+                    if(numberOfMembers<4)
+                    {
+                      Firestore.instance.collection(source).document(roomId).updateData({
+                        'member${numberOfMembers+1}': IntroScreen.getUid(),
+                        'numberOfMembers': numberOfMembers+1,
                       });
-                  }
+
+                      Navigator.push(context, MaterialPageRoute(builder: (context)=>InRoom(
+                        source: source,
+                        destination: destination,
+                        isOwner: false,
+                        roomId: roomId,
+                        introduce: true,
+                      )));
+                    }
+                    else
+                    {
+                      //TODO: Show a toast that room is full now
+                    }
+                  });
+                }
                 else{
                   //TODO: Show a Toast
-                  }
+                }
               },
             ),
-          ],
-        ),
+          )
+        ],
       ),
     );
   }
@@ -156,7 +191,7 @@ class RequestCard extends StatelessWidget {
                 RaisedButton(
                   child: Text('Accept'),
                   onPressed: (){
-                    //TODO: Implement Accept Functionality
+                    //Implement Accept Functionality
                     Firestore.instance.collection(source).document(roomId).collection('requests').document(requestedUID).updateData({
                       'status': kConfirmJoin,
                     });
@@ -269,6 +304,66 @@ class MessageBubble extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class CustomButton extends StatelessWidget {
+  final String text;
+  final Function onPressed;
+  CustomButton({@required this.text,this.onPressed});
+  @override
+  Widget build(BuildContext context) {
+    return RaisedButton(
+        shape: RoundedRectangleBorder(borderRadius: new BorderRadius.circular(30.0)),
+        color: kThemeColor,
+        onPressed:onPressed,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 40,vertical: 16),
+          child: Text(text,style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold,fontSize: 20),),
+        )
+    );
+  }
+}
+
+
+class BottomLargeButton extends StatelessWidget {
+
+  final String text;
+  final Function onPressed;
+  BottomLargeButton({this.text,this.onPressed});
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      height: 60,
+      child: RaisedButton(
+        color: kThemeColor,
+        child: Text(text,style: TextStyle(fontSize: 20,color: Colors.white),),
+        onPressed: onPressed,
+      ),
+    );
+  }
+}
+
+class TitleRow extends StatelessWidget {
+  final String title;
+  TitleRow({this.title});
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Icon(Icons.keyboard_backspace,color: kThemeColor,size: 35,),
+        Padding(
+          padding: EdgeInsets.all(8.0),
+          child: Image(
+            height: 35,
+            image: AssetImage('images/scab_small_logo.png'),
+          ),
+        ),
+        Text(title,style: TextStyle(color: kThemeColor,fontSize: 28,fontWeight: FontWeight.bold),),
+      ],
     );
   }
 }

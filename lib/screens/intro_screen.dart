@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:scab_flutter/resources/components.dart';
 import 'package:scab_flutter/screens/journey_plan_screen.dart';
 import 'package:scab_flutter/screens/login_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -49,14 +50,15 @@ class _IntroScreenState extends State<IntroScreen> {
               ],
             ),
           ),
-          Center(
-            child: RaisedButton(
-                onPressed: (){
-                  Navigator.push(context, MaterialPageRoute(
-                    builder: (context)=>_firstLogIn?LoginPage():JourneyPlanScreen(mUid: _uid,),
-                  ));
-                },
-                child: Text('Skip')
+          Flexible(
+            flex: 2,
+            child: CustomButton(
+              text: 'Skip',
+              onPressed: (){
+                Navigator.push(context, MaterialPageRoute(
+                  builder: (context)=>_firstLogIn?LoginPage():JourneyPlanScreen(mUid: _uid,),
+                ));
+              },
             ),
           ),
         ],
