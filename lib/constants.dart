@@ -26,3 +26,6 @@ const kRejectedRequest = 'Rejected Request';
 
 const kMessageType='msg';
 const kIntroType='intro';
+const kCreatedRoom='has created the room';
+const kJoinedRoom='has joined the room';
+const kLeftRoom='has left the room';

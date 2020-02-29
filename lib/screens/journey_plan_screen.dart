@@ -17,7 +17,6 @@ String _source,_destination;
 int hour,minutes;
 
 class JourneyPlanScreen extends StatefulWidget {
-  static String id = 'journey_plan';
   static String username;
   final String mUid;
   JourneyPlanScreen({this.mUid});
