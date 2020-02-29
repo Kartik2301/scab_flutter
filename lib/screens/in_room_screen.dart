@@ -97,55 +97,105 @@ class _InRoomState extends State<InRoom> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('In Room'),backgroundColor: kThemeColor,),
-      body: Column(
-        children: <Widget>[
-          Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: Padding(
+        padding:EdgeInsets.symmetric(vertical: 32,horizontal: 8),
+        child: Column(
+          children: <Widget>[
+            TitleRow(title: 'My Ride'),
+            SizedBox(height: 10,),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.all(32.0),
-                  child: Text(widget.source),
+                Image(
+                  height: 120,
+                  image: AssetImage('images/maps_markers.png'),
                 ),
-                Text('Members: $numberOfMembers'),
-                Padding(
-                  padding: const EdgeInsets.all(32.0),
-                  child: Text(widget.destination),
+                SizedBox(width: 40,),
+                Column(
+                  children: <Widget>[
+                    Container(
+                      width: 250,
+                      color: Colors.grey[200],
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8,horizontal: 16),
+                        child: Text(widget.source,style: TextStyle(fontSize: 18),),
+                      ),
+                    ),
+                    SizedBox(height: 50,),//TODO: No. of members to be shown
+                    Container(
+                      width: 250,
+                      color: Colors.grey[200],
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8,horizontal: 16),
+                        child: Text(widget.destination,style: TextStyle(fontSize: 18),),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ),
-          Expanded(
-            flex: 5,
-            child: Container(
-              child: ListView.builder(
-                itemCount: membersList.length,
-                itemBuilder: (BuildContext context,int index){
-                  return membersList[index];
-                },
+            Expanded(
+              flex: 5,
+              child: Container(
+                child: ListView.builder(
+                  itemCount: membersList.length,
+                  itemBuilder: (BuildContext context,int index){
+                    return membersList[index];
+                  },
+                ),
               ),
             ),
-          ),
-          Row(
-            children: <Widget>[
-              RaisedButton(
-                child: Text('SEE JOINING REQUESTS'),
-                onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context)=>RequestsPage(requestsList: requestsList,)));
-                },
-              ),
-              RaisedButton(
-                child: Text('Chat'),
-                onPressed: (){
-                  Navigator.push(context, MaterialPageRoute(
-                    builder: (context)=>ChatScreen(source: widget.source,roomId: widget.roomId,)
-                  ));
-                },
-              )
-            ],
-          ),
-        ],
+            RaisedButton(
+              child: Text('SEE JOINING REQUESTS'),
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context)=>RequestsPage(requestsList: requestsList,)));
+              },
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: RaisedButton(
+                      color: kBlack,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 16),
+                        child: Text('Chat',style: TextStyle(fontSize: 18,color: Colors.white),),
+                      ),
+                      onPressed: (){
+                        Navigator.push(context, MaterialPageRoute(
+                          builder: (context)=>ChatScreen(source: widget.source,roomId: widget.roomId,)
+                        ));
+                      },
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: RaisedButton(
+                      color: kRed,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 16),
+                        child: Text('Cancel Ride',style: TextStyle(fontSize: 18,color: Colors.white),),
+                      ),
+                      onPressed: (){
+                        //TODO: Implement Delete Room Functionality
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            BottomLargeButton(
+              text: 'Book Cab',
+              onPressed: (){
+                //Implement Booking Functionality
+              },
+            )
+          ],
+        ),
       ),
     );
   }
@@ -193,12 +243,14 @@ class _ChatScreenState extends State<ChatScreen> {
         if(type==kMessageType) {
           newList.add(MessageBubble(text: textMsg,
             sender: sender,
+            type: type,
             isMe: senderUid == IntroScreen.getUid(),));
         }
         else if (type==kIntroType){
             newList.add(MessageBubble(
               text: '$sender has joined the room',
               sender: sender,
+              type: type,
               isMe: false,));
           }
       }
@@ -235,15 +287,24 @@ class _ChatScreenState extends State<ChatScreen> {
               child: Row(
                 children: <Widget>[
                   Expanded(
-                    child: TextField(
-                      onChanged: (value){
-                        text = value;
-                      },
-                      controller: controller,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: TextField(
+                        onChanged: (value){
+                          text = value;
+                        },
+                        controller: controller,
+                        cursorColor: kRed,
+                        style: TextStyle(fontSize: 18),
+                      ),
                     ),
                   ),
                   RaisedButton(
-                    child: Text('Send'),
+                    color: kThemeColor,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text('Send',style: TextStyle(color: Colors.white,fontSize: 18),),
+                    ),
                     onPressed: (){
                       //SEND MESSAGE
                       controller.clear();

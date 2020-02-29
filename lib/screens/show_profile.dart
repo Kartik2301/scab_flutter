@@ -17,7 +17,11 @@ class ShowProfile extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
             CircleAvatar(
-              child: Image.network(_user.imageUrl),
+              radius: 45,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(50),
+                child: Image.network(_user.imageUrl),
+              ),
             ),
             Center(child: Text(_user.fullName)),
             Center(child: Text(_user.email)),

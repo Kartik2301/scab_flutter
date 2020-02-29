@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:scab_flutter/constants.dart';
 import 'package:scab_flutter/resources/components.dart';
 import 'package:scab_flutter/resources/objects.dart';
@@ -8,7 +9,7 @@ import 'package:scab_flutter/screens/intro_screen.dart';
 
 final _firestore = Firestore.instance;
 String _source,_destination;
-User _user;
+bool roomsLoading;
 
 class RoomSearch extends StatefulWidget {
   final User user;
@@ -25,8 +26,7 @@ class _RoomSearchState extends State<RoomSearch> {
 
   void fetchRequestedRoomsStatus () async
   {
-    Future<Room> fetchRoomDetails(String roomId) async
-    {
+    Future<Room> fetchRoomDetails(String roomId) async {
       Room room = Room();
       try{
         var document = await _firestore.collection('places').document(_source).collection('rooms').document(roomId).get();
@@ -35,8 +35,7 @@ class _RoomSearchState extends State<RoomSearch> {
         room.destination =document.data['destination']??'Destination Unavailable';
         room.journeyTime = document.data['journeyTime']??'NULL';
       }
-      catch(e)
-      {
+      catch(e) {
         print('RequestedRoomId not found from searched source');
       }
       return room;
@@ -88,12 +87,13 @@ class _RoomSearchState extends State<RoomSearch> {
       }
       setState(() {
         roomsList = updatedRoomsList;
+        roomsLoading=false;
       });
     }
   }
 
   void createRoom()async{
-    //TODO: Implement Firebase Room Creation
+    //Implement Room Creation in Firebase
     String roomId;
     DocumentReference ref = await _firestore.collection('places').document(_source).collection('rooms')
         .add({
@@ -117,9 +117,9 @@ class _RoomSearchState extends State<RoomSearch> {
   @override
   void initState() {
     super.initState();
-    _user=widget.user;
     _source=widget.source;
     _destination=widget.destination;
+    roomsLoading=true;
     fetchRooms();
     fetchRequestedRoomsStatus();
   }
@@ -127,58 +127,66 @@ class _RoomSearchState extends State<RoomSearch> {
   bool allRooms=true;
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: Padding(
-          padding: EdgeInsets.symmetric(vertical: 32,horizontal: 8),
-          child: Column(
-            children: <Widget>[
-              TitleRow(title: 'Rides',),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  RaisedButton(
-                    color: Colors.white,
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 32,vertical: 16),
-                      child: Text('All Rooms'),
+    return ModalProgressHUD(
+      inAsyncCall: roomsLoading,
+      child: Scaffold(
+          body: Padding(
+            padding: EdgeInsets.symmetric(vertical: 32,horizontal: 8),
+            child: Column(
+              children: <Widget>[
+                TitleRow(title: 'Rides',),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    Expanded(
+                      child: RaisedButton(
+                        color: Colors.white,
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16,vertical: 16),
+                          child: Text('All Rooms',style: TextStyle(fontSize: 18),),
+                        ),
+                        onPressed: (){
+                          setState(() {
+                            allRooms=true;
+                          });
+                        },
+                      ),
                     ),
-                    onPressed: (){
-                      setState(() {
-                        allRooms=true;
-                      });
-                    },
-                  ),
-                  RaisedButton(
-                    color: Colors.white,
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 32,vertical: 16),
-                      child: Text('My Rooms'),
+                    Expanded(
+                      child: RaisedButton(
+                        color: Colors.white,
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16,vertical: 16),
+                          child: Text('My Rooms',style: TextStyle(fontSize: 18),),
+                        ),
+                        onPressed: (){
+                          setState(() {
+                            allRooms=false;
+                          });
+                        },
+                      ),
                     ),
-                    onPressed: (){
-                      setState(() {
-                        allRooms=false;
-                      });
-                    },
-                  ),
-                ],
-              ),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: allRooms?roomsList.length:myRoomsList.length,
-                  itemBuilder: (context,index){
-                    return allRooms?roomsList[index]:myRoomsList[index];
-                  },
+                  ],
                 ),
-              ),
-              Container(
-                child: RaisedButton(
-                  child: Text('CREATE'),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: ListView.builder(
+                      itemCount: allRooms?roomsList.length:myRoomsList.length,
+                      itemBuilder: (context,index){
+                        return allRooms?roomsList[index]:myRoomsList[index];
+                      },
+                    ),
+                  ),
+                ),
+                BottomLargeButton(
+                  text: 'Create your own room',
                   onPressed: createRoom,
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
+      ),
     );
   }
 }

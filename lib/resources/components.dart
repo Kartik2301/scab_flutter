@@ -260,15 +260,16 @@ class MessageBubble extends StatelessWidget {
   final String text;
   final String sender;
   final bool isMe;
+  final String type;
 
-  MessageBubble({this.text, this.sender,this.isMe});
+  MessageBubble({this.text, this.sender,this.isMe,this.type});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.all(10.0),
       child: Column(
-        crossAxisAlignment: isMe?CrossAxisAlignment.end:CrossAxisAlignment.start,
+        crossAxisAlignment:type==kMessageType?(isMe?CrossAxisAlignment.end:CrossAxisAlignment.start):CrossAxisAlignment.center,
         children: <Widget>[
           Text(
             sender,
@@ -279,7 +280,7 @@ class MessageBubble extends StatelessWidget {
           ),
           Material(
             elevation: 5.0,
-            borderRadius: isMe?BorderRadius.only(
+            borderRadius: type==kMessageType?(isMe?BorderRadius.only(
                 topLeft: Radius.circular(30.0),
                 bottomLeft: Radius.circular(30.0),
                 bottomRight: Radius.circular(30.0)
@@ -287,8 +288,13 @@ class MessageBubble extends StatelessWidget {
                 topRight: Radius.circular(30.0),
                 bottomLeft: Radius.circular(30.0),
                 bottomRight: Radius.circular(30.0)
+            )):BorderRadius.only(
+                topLeft: Radius.circular(30.0),
+                bottomLeft: Radius.circular(30.0),
+                bottomRight: Radius.circular(30.0),
+              topRight: Radius.circular(30.0),
             ),
-            color: isMe?Colors.lightBlueAccent:Colors.white,
+            color: type==kMessageType?(isMe?kThemeColor:Colors.white):Colors.black,
             child: Padding(
               padding:  EdgeInsets.symmetric(horizontal: 20.0,
                   vertical: 10.0),
@@ -296,7 +302,7 @@ class MessageBubble extends StatelessWidget {
                 text,
                 style: TextStyle(
                   fontSize: 15.0,
-                  color: isMe? Colors.white:Colors.black,
+                  color: type==kMessageType?(isMe? Colors.white:Colors.black):Colors.white,
                 ),
               ),
             ),
@@ -327,17 +333,18 @@ class CustomButton extends StatelessWidget {
 
 
 class BottomLargeButton extends StatelessWidget {
-
   final String text;
   final Function onPressed;
-  BottomLargeButton({this.text,this.onPressed});
+  final Color colour;
+  final double width;
+  BottomLargeButton({this.text,this.onPressed,this.colour,this.width});
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: double.infinity,
+      width: width??double.infinity,
       height: 60,
       child: RaisedButton(
-        color: kThemeColor,
+        color: colour??kThemeColor,
         child: Text(text,style: TextStyle(fontSize: 20,color: Colors.white),),
         onPressed: onPressed,
       ),
@@ -353,7 +360,9 @@ class TitleRow extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        Icon(Icons.keyboard_backspace,color: kThemeColor,size: 35,),
+        Icon(
+          Icons.keyboard_backspace,
+          color: kThemeColor,size: 35,),
         Padding(
           padding: EdgeInsets.all(8.0),
           child: Image(
