@@ -32,10 +32,47 @@ class DetailInputWidget extends StatelessWidget {
 }
 
 
-class RoomCard extends StatelessWidget {
-  final String source,destination,roomOwner,ownerRoll,roomId,joiningStatus;
-  RoomCard({this.source,this.destination,this.roomOwner,this.ownerRoll,this.roomId,this.joiningStatus});
+class RoomCard extends StatefulWidget {
+  final String source,destination,member1,roomId,joiningStatus;
+  final int numberOfMembers,journeyTime;
 
+  RoomCard({this.source,this.destination,this.roomId,this.joiningStatus,this.numberOfMembers,this.member1,this.journeyTime});
+
+  @override
+  _RoomCardState createState() => _RoomCardState();
+}
+
+class _RoomCardState extends State<RoomCard> {
+  User owner;
+  bool loadingOwner;
+
+  Future<User> fetchMemberProfile(String uid) async{
+    User _user = User();
+    final _firestore= Firestore.instance;
+    var document = await _firestore.collection('users').document(uid).get();
+    _user.uid=uid;
+    _user.imageUrl=document.data['imageUrl'];
+    _user.fullName= document.data['fullName'];
+    _user.email=document.data['email'];
+    _user.gender=document.data['gender'];
+    _user.phoneNumber=document.data['phoneNumber'];
+    _user.rollNo=_user.email.substring(0,_user.email.indexOf('@')).toUpperCase();
+    return _user;
+  }
+
+  void fetchOwnerDetails() async{
+    owner= await fetchMemberProfile(widget.member1);
+    setState(() {
+      loadingOwner=false;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadingOwner=true;
+    fetchOwnerDetails();
+  }
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -61,11 +98,22 @@ class RoomCard extends StatelessWidget {
                   children: <Widget>[
                     Text('Room Owner',style: TextStyle(fontSize: 18),),
                     Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        Text(roomOwner??'NA',style: TextStyle(fontSize: 22,fontWeight: FontWeight.bold),),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(ownerRoll??'NA'),
+                        loadingOwner?Container(width: 150,height:20,color: Colors.grey[100],)
+                            :Text(owner.fullName,style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              child: loadingOwner?Container(width: 100,height:20,color: Colors.grey[100],)
+                                  : Text(owner.rollNo,style: TextStyle(fontSize: 12),),
+                            ),
+                            SizedBox(width: 20,),
+                            loadingOwner?Container(width: 10,height:20,color: Colors.grey[100],):
+                              Text('Male',style: TextStyle(fontSize: 12),)
+                          ],
                         )
                       ],
                     ),
@@ -74,12 +122,12 @@ class RoomCard extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    Expanded(child: Text(source??'NA',style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),)),
+                    Expanded(child: Text(widget.source??'NA',style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold),)),
                     Image(
                       height: 20,
                       image: AssetImage('images/horizontal_markers.png',),
                     ),
-                    Expanded(child: Text(destination??'NA',style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),))
+                    Expanded(child: Text(widget.destination??'NA',style: TextStyle(fontSize: 14,fontWeight: FontWeight.bold),))
                   ],
                 ),
                 Padding(
@@ -89,7 +137,7 @@ class RoomCard extends StatelessWidget {
                     children: <Widget>[
                       Text('Time: 4:00 PM',style: TextStyle(fontSize: 10),),
                       Text('4 hrs left',style: TextStyle(fontSize: 10,color: kRed,fontWeight: FontWeight.bold),),
-                      Text('Members: 1',style: TextStyle(fontSize: 10),)
+                      Text('Members: ${widget.numberOfMembers}',style: TextStyle(fontSize: 10),)
                     ],
                   ),
                 )
@@ -98,7 +146,7 @@ class RoomCard extends StatelessWidget {
           ),
           Container(
             decoration: BoxDecoration(
-                color: joiningStatus==kJoinRequest?Colors.black:(joiningStatus==kConfirmJoin?kThemeColor:kRed),
+                color: widget.joiningStatus==kJoinRequest?Colors.black:(widget.joiningStatus==kConfirmJoin?kThemeColor:kRed),
                 borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(10),
                 bottomRight: Radius.circular(10),
@@ -106,12 +154,12 @@ class RoomCard extends StatelessWidget {
             ),
             width: double.infinity,
             child: FlatButton(
-              color: joiningStatus==kJoinRequest?Colors.black:(joiningStatus==kConfirmJoin?kThemeColor:kRed),
-              child: Text(joiningStatus??kJoinRequest,style: TextStyle(color: Colors.white),),
+              color: widget.joiningStatus==kJoinRequest?Colors.black:(widget.joiningStatus==kConfirmJoin?kThemeColor:kRed),
+              child: Text(widget.joiningStatus??kJoinRequest,style: TextStyle(color: Colors.white),),
               onPressed: (){
-                if(joiningStatus==kJoinRequest) {
+                if(widget.joiningStatus==kJoinRequest) {
                   //Send Joining Requests
-                  Firestore.instance.collection(source).document(roomId)
+                  Firestore.instance.collection(widget.source).document(widget.roomId)
                       .collection('requests').document(IntroScreen.getUid())
                       .setData({
                     'status': kPendingRequest,
@@ -120,29 +168,29 @@ class RoomCard extends StatelessWidget {
                   });
                   Firestore.instance.collection('users').document(
                       IntroScreen.getUid()).collection('myRooms').document(
-                      roomId).setData({
+                      widget.roomId).setData({
                     'status': kPendingRequest,
-                    'roomId': roomId,
+                    'roomId': widget.roomId,
                     'createdAt': Timestamp.now(),
                   });
                 }
-                else if(joiningStatus==kConfirmJoin)
+                else if(widget.joiningStatus==kConfirmJoin)
                 {
                   //Add new member in the room
-                  Firestore.instance.collection(source).document(roomId).get().then((value){
+                  Firestore.instance.collection(widget.source).document(widget.roomId).get().then((value){
                     print('value + ${value.data}');
                     int numberOfMembers = value.data['numberOfMembers'];
                     if(numberOfMembers<4) {
-                      Firestore.instance.collection(source).document(roomId).updateData({
+                      Firestore.instance.collection(widget.source).document(widget.roomId).updateData({
                         'member${numberOfMembers+1}': IntroScreen.getUid(),
                         'numberOfMembers': numberOfMembers+1,
                       });
 
                       Navigator.push(context, MaterialPageRoute(builder: (context)=>InRoom(
-                        source: source,
-                        destination: destination,
+                        source: widget.source,
+                        destination: widget.destination,
                         isOwner: false,
-                        roomId: roomId,
+                        roomId: widget.roomId,
                         introduce: true,
                       )));
                     }

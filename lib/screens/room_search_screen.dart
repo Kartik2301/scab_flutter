@@ -75,15 +75,19 @@ class _RoomSearchState extends State<RoomSearch> {
       List<RoomCard> updatedRoomsList = [];
       for(var message in snapshot.documents)
       {
-        String source,destination,roomOwner,ownerRoll,roomId;
+        String source,destination,roomId;
+        int numberOfMembers,journeyTime;
+        String member1;
 
         source = message.data['source']??'Source Unavailable';
         destination =message.data['destination']??'Destination Unavailable';
-        roomOwner = "John Wick";
-        ownerRoll = "IEC2018069";
         roomId = message.data['roomId']??'Room Id Unavailable';
+        numberOfMembers = message.data['numberOfMembers'];
+        journeyTime = message.data['journeyTime'];
+        member1 = message.data['member1'];
 
-        updatedRoomsList.add(RoomCard(source: source,destination:destination,ownerRoll: ownerRoll,roomOwner:roomOwner,roomId: roomId,joiningStatus: kJoinRequest,));
+        updatedRoomsList.add(RoomCard(source: source,destination:destination,roomId: roomId,
+          joiningStatus: kJoinRequest,numberOfMembers: numberOfMembers,member1: member1,journeyTime: journeyTime,));
       }
       setState(() {
         roomsList = updatedRoomsList;
@@ -102,7 +106,6 @@ class _RoomSearchState extends State<RoomSearch> {
       'numberOfMembers': 1,
       'createdAt':Timestamp.now(),
       'journeyTime':1131322323,
-      'isVacant':true,
     });
     roomId=ref.documentID;
     print(roomId);
@@ -131,7 +134,7 @@ class _RoomSearchState extends State<RoomSearch> {
       inAsyncCall: roomsLoading,
       child: Scaffold(
           body: Padding(
-            padding: EdgeInsets.symmetric(vertical: 32,horizontal: 8),
+            padding: EdgeInsets.only(left: 8,right: 8,top: 32,bottom: 8),
             child: Column(
               children: <Widget>[
                 TitleRow(title: 'Rides',),

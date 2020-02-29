@@ -98,7 +98,7 @@ class _InRoomState extends State<InRoom> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding:EdgeInsets.symmetric(vertical: 32,horizontal: 8),
+        padding:EdgeInsets.only(left: 8,right: 8,top: 32,bottom: 8),
         child: Column(
           children: <Widget>[
             TitleRow(title: 'My Ride'),

@@ -63,7 +63,7 @@ class _JourneyPlanScreenState extends State<JourneyPlanScreen> {
       child: SafeArea(
         child: Scaffold(
           body: Padding(
-            padding: EdgeInsets.symmetric(vertical: 32,horizontal: 8),
+            padding: EdgeInsets.only(left: 8,right: 8,top: 32,bottom: 8),
             child: Column(
               mainAxisSize: MainAxisSize.max,
               crossAxisAlignment: CrossAxisAlignment.stretch,
