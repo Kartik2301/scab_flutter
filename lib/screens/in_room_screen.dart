@@ -22,7 +22,7 @@ class _InRoomState extends State<InRoom> {
 
   List<MemberCard> membersList = [];
   List<RequestCard> requestsList=[];
-  User member1,member2,member3,member4;
+  List<User> members=[];
   int numberOfMembers=0;
   List<MessageBubble> messagesList = [];
 
@@ -61,17 +61,29 @@ class _InRoomState extends State<InRoom> {
   }
 
   void setMembers() async{
-    await for(var snapshot in _firestore.collection('places').document(widget.source).collection('rooms').document(widget.roomId).snapshots()){
-      print("Doc Updated ${snapshot.data}");
-      numberOfMembers = snapshot.data['numberOfMembers'];
-      List<MemberCard> newList=[];
-      for(int i=1;i<=numberOfMembers;i++){
-        User user = await fetchMemberProfile(snapshot.data['member$i']);
-        newList.add(MemberCard(user,designation: i==1?'Owner':widget.destination,));
+    try {
+      await for (var snapshot in _firestore.collection('places').document(
+          widget.source).collection('rooms')
+          .document(widget.roomId)
+          .snapshots()) {
+        print("Doc Updated ${snapshot.data}");
+        numberOfMembers = snapshot.data['numberOfMembers'];
+        List<MemberCard> newList = [];
+        members.clear();
+        for (int i = 1; i <= numberOfMembers; i++) {
+          User user = await fetchMemberProfile(snapshot.data['member$i']);
+          members.add(user);
+          newList.add(MemberCard(
+            user, designation: i == 1 ? 'Owner' : widget.destination,));
+        }
+        setState(() {
+          membersList = newList;
+        });
       }
-      setState(() {
-        membersList=newList;
-      });
+    }
+    catch(e)
+    {
+      print('Exception $e caught in setMembers');
     }
 
   }
@@ -87,36 +99,16 @@ class _InRoomState extends State<InRoom> {
   }
 
   void leaveRoom(){
+    List<User> localMembers = members;
     int getMemberPosition(){
-      if(member1.uid==IntroScreen.getUid())
-        return 1;
-      else if(member2.uid==IntroScreen.getUid())
-        return 2;
-      else if(member3.uid==IntroScreen.getUid())
-        return 3;
-      else
-        return 4;
-    }
-    User getIthMember(int i){
-      switch(i){
-        case 1:{
-          return member1;
-        }
-        case 2:{
-          return member2;
-        }
-        case 3:{
-          return member3;
-        }
-        case 4:{
-          return member4;
-        }
+      for(int i=0;i<4;i++){
+        if(localMembers[i].uid==IntroScreen.getUid())
+          return i;
       }
-      return member1;
+      return 1;
     }
-    int mNumberOfMembers = numberOfMembers;
-    numberOfMembers--;
 
+    int mNumberOfMembers = numberOfMembers;
     DocumentReference documentReference = _firestore.collection('places').document(widget.source).collection('rooms').document(widget.roomId);
     try {
       if (mNumberOfMembers == 1) {
@@ -129,24 +121,23 @@ class _InRoomState extends State<InRoom> {
           'numberOfMembers': mNumberOfMembers - 1,
         });
 
-        int memberPosition = getMemberPosition();
+        int memberPosition = getMemberPosition()+1;
         for (int i = memberPosition; i < mNumberOfMembers; i++) {
           documentReference.updateData({
-            'member$i': getIthMember(i).uid,
+            'member$i': localMembers[i].uid,
           });
         }
         documentReference.updateData({
-          'member$numberOfMembers': null,
+          'member$mNumberOfMembers': null,
         });
       }
     }
     catch(e){
-      print(e);
+      print('Exeption $e caught in leaveRoomMethod');
     }
     Navigator.push(context, MaterialPageRoute(
-        builder: (context)=>JourneyPlanScreen()
+        builder: (context)=>JourneyPlanScreen(mUid: IntroScreen.getUid(),)
     ));
-    dispose();
   }
 
   Future<bool> _onWillPop() async {
@@ -176,6 +167,8 @@ class _InRoomState extends State<InRoom> {
   @override
   void initState() {
     super.initState();
+    User user = User();
+    members.add(user);
     fetchRequests();
     setMembers();
     if(widget.introduce){
