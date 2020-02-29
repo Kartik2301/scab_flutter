@@ -402,15 +402,21 @@ class BottomLargeButton extends StatelessWidget {
 
 class TitleRow extends StatelessWidget {
   final String title;
-  TitleRow({this.title});
+  final Function onBackPress;
+  TitleRow({this.title,this.onBackPress});
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.start,
       children: <Widget>[
-        Icon(
-          Icons.keyboard_backspace,
-          color: kThemeColor,size: 35,),
+        FlatButton(
+          onPressed: onBackPress??(){
+            Navigator.of(context).pop();
+          },
+          child: Icon(
+            Icons.keyboard_backspace,
+            color: kThemeColor,size: 35,),
+        ),
         Padding(
           padding: EdgeInsets.all(8.0),
           child: Image(

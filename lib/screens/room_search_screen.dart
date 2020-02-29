@@ -21,6 +21,7 @@ class RoomSearch extends StatefulWidget {
 
 class _RoomSearchState extends State<RoomSearch> {
 
+  bool roomCreationInProgress=false;
   List<RoomCard> roomsList = [];
   List<RoomCard> myRoomsList = [];
 
@@ -95,9 +96,11 @@ class _RoomSearchState extends State<RoomSearch> {
       });
     }
   }
-
   void createRoom()async{
     //Implement Room Creation in Firebase
+    setState(() {
+      roomCreationInProgress=true;
+    });
     String roomId;
     DocumentReference ref = await _firestore.collection('places').document(_source).collection('rooms')
         .add({
@@ -113,7 +116,9 @@ class _RoomSearchState extends State<RoomSearch> {
     _firestore.collection('places').document(_source).collection('rooms').document(roomId).updateData({
       'member1': IntroScreen.getUid(),
     });
-
+    setState(() {
+      roomCreationInProgress=false;
+    });
     Navigator.push(context, MaterialPageRoute(builder: (context)=>InRoom(roomId: roomId,source: _source,destination: _destination,isOwner: true,introduce: true,)));
   }
 
@@ -126,6 +131,7 @@ class _RoomSearchState extends State<RoomSearch> {
     fetchRooms();
     fetchRequestedRoomsStatus();
   }
+
 
   bool allRooms=true;
   @override
@@ -182,10 +188,16 @@ class _RoomSearchState extends State<RoomSearch> {
                     ),
                   ),
                 ),
-                BottomLargeButton(
-                  text: 'Create your own room',
-                  onPressed: createRoom,
-                ),
+
+            Container(
+              width: double.infinity,
+              height: 60,
+              child: RaisedButton(
+                color: kThemeColor,
+                child: roomCreationInProgress?CircularProgressIndicator():Text('Create your own room',style: TextStyle(fontSize: 20,color: Colors.white),),
+                onPressed: createRoom,
+              ),
+            ),
               ],
             ),
           ),

@@ -68,7 +68,12 @@ class _JourneyPlanScreenState extends State<JourneyPlanScreen> {
               mainAxisSize: MainAxisSize.max,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                TitleRow(title: 'Create a Ride'),
+                TitleRow(
+                    title: 'Create a Ride',
+                    onBackPress: (){
+                      showDialog(context: context,
+                      builder: (context)=>showExitDialog(context));
+                },),
                 SizedBox(height: 80,),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -122,8 +127,7 @@ class _JourneyPlanScreenState extends State<JourneyPlanScreen> {
                 BottomLargeButton(
                     text: 'Search Ride',
                     onPressed: () {
-                      if(_source==null||_destination==null)
-                        {
+                      if(_source==null||_destination==null) {
                           Fluttertoast.showToast(
                               msg: "Please Enter the Ride Details"
                           );
@@ -224,20 +228,24 @@ class _JourneyPlanScreenState extends State<JourneyPlanScreen> {
   Future<bool> _onWillPop() async {
     return (await showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Are you sure?'),
-        content: Text('Do you want to exit an App'),
-        actions: <Widget>[
-          FlatButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text('No'),
-          ),
-          FlatButton(
-            onPressed: () => SystemChannels.platform.invokeMethod('SystemNavigator.pop'),
-            child: Text('Yes'),
-          ),
-        ],
-      ),
+      builder: (context) => showExitDialog(context),
     )) ?? false;
+  }
+
+  AlertDialog showExitDialog(BuildContext context) {
+    return AlertDialog(
+      title: Text('Exit',style: TextStyle(fontSize: 30),),
+      content: Text('Are you sure you don\'t want to share the ride?'),
+      actions: <Widget>[
+        FlatButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: Text('No'),
+        ),
+        FlatButton(
+          onPressed: () => SystemChannels.platform.invokeMethod('SystemNavigator.pop'),
+          child: Text('Yes'),
+        ),
+      ],
+    );
   }
 }
