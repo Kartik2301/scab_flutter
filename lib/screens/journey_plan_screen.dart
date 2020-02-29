@@ -10,11 +10,13 @@ import 'package:scab_flutter/screens/intro_screen.dart';
 import 'package:scab_flutter/screens/room_search_screen.dart';
 import 'package:scab_flutter/screens/show_profile.dart';
 import 'package:scab_flutter/resources/components.dart';
+import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 
 User _user = User();
 bool loadingUserData;
 String _source,_destination;
 int hour,minutes;
+String _time = "Time not set";
 
 class JourneyPlanScreen extends StatefulWidget {
   static String username;
@@ -31,7 +33,6 @@ class _JourneyPlanScreenState extends State<JourneyPlanScreen> {
     final _firestore= Firestore.instance;
     var document = await _firestore.collection('users').document(widget.mUid).get();
     print(document.data);
-
     _user.uid=widget.mUid;
     _user.imageUrl=document.data['imageUrl'];
     _user.fullName= document.data['fullName'];
@@ -86,32 +87,82 @@ class _JourneyPlanScreenState extends State<JourneyPlanScreen> {
                       children: <Widget>[
                         Container(
                           color: Colors.grey[100],
-                          child: get_sourceDropDownButton(),
+                          child: getSourceDropDownButton(),
                         ),
                         SizedBox(height: 50,),
                         Container(
                           color: Colors.grey[100],
-                          child: get_destinationDropDownButton(),
+                          child: getDestinationDropDownButton(),
                         ),
                       ],
                     ),
                   ],
                 ),
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
-                    Text('TIME'),
-                    Flexible(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: getHourPicker(),
+                    Padding(
+                      padding: EdgeInsets.only(left: 70.0, top: 16.0, bottom: 16.0),
+                      child: RaisedButton(
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5.0)),
+                        elevation: 4.0,
+                        onPressed: () {
+                          DatePicker.showTimePicker(context,
+                              theme: DatePickerTheme(
+                                containerHeight: 210.0,
+                              ),
+                              showTitleActions: true, onConfirm: (time) {
+                                print('confirm $time');
+                                _time = '${time.hour} : ${time.minute} : ${time.second}';
+                                setState(() {});
+                              }, currentTime: DateTime.now(), locale: LocaleType.en);
+                          setState(() {});
+                        },
+                        child: Container(
+                          alignment: Alignment.center,
+                          height: 50.0,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Row(
+                                children: <Widget>[
+                                  Container(
+                                    child: Row(
+                                      children: <Widget>[
+                                        Icon(
+                                          Icons.access_time,
+                                          size: 18.0,
+                                          color: Colors.teal,
+                                        ),
+                                        Text(
+                                          " $_time",
+                                          style: TextStyle(
+                                              color: Colors.teal,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 18.0),
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                ],
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(left : 8.0),
+                                child: Text(
+                                  "  Change",
+                                  style: TextStyle(
+                                      color: Colors.teal,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18.0),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        color: Colors.white,
                       ),
-                    ),
-                    Flexible(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: getMinutePicker(),
-                      ),
-                    ),
+                    )
                   ],
                 ),
                 BottomLargeButton(
@@ -137,7 +188,7 @@ class _JourneyPlanScreenState extends State<JourneyPlanScreen> {
                           source: _source,
                           destination: _destination,)));
                       }
-                }),
+                    }),
               ],
 
             ),
@@ -147,7 +198,7 @@ class _JourneyPlanScreenState extends State<JourneyPlanScreen> {
     );
   }
 
-  DropdownButton<String> get_sourceDropDownButton() {
+  DropdownButton<String> getSourceDropDownButton() {
     List <DropdownMenuItem<String>> dropDownMenuItems = [];
     for (String event in placesList) {
       var newItem = DropdownMenuItem(
@@ -166,7 +217,7 @@ class _JourneyPlanScreenState extends State<JourneyPlanScreen> {
           });
         });
   }
-  DropdownButton<String> get_destinationDropDownButton() {
+  DropdownButton<String> getDestinationDropDownButton() {
     List <DropdownMenuItem<String>> dropDownMenuItems = [];
     for (String event in placesList) {
       var newItem = DropdownMenuItem(
