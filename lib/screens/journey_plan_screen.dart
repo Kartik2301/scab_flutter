@@ -11,7 +11,7 @@ import 'package:scab_flutter/screens/room_search_screen.dart';
 import 'package:scab_flutter/screens/show_profile.dart';
 import 'package:scab_flutter/resources/components.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
-
+import 'package:flutter_time_picker_spinner/flutter_time_picker_spinner.dart';
 User _user = User();
 bool loadingUserData;
 String _source,_destination;
@@ -28,7 +28,7 @@ class JourneyPlanScreen extends StatefulWidget {
 }
 
 class _JourneyPlanScreenState extends State<JourneyPlanScreen> {
-
+  DateTime _dateTime = DateTime.now();
   void fetchUserProfileData() async {
     final _firestore= Firestore.instance;
     var document = await _firestore.collection('users').document(widget.mUid).get();
@@ -74,7 +74,7 @@ class _JourneyPlanScreenState extends State<JourneyPlanScreen> {
                       showDialog(context: context,
                       builder: (context)=>showExitDialog(context));
                 },),
-                SizedBox(height: 80,),
+                SizedBox(height: 40,),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
@@ -98,71 +98,32 @@ class _JourneyPlanScreenState extends State<JourneyPlanScreen> {
                     ),
                   ],
                 ),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                Column(
                   children: <Widget>[
-                    Padding(
-                      padding: EdgeInsets.only(left: 70.0, top: 16.0, bottom: 16.0),
-                      child: RaisedButton(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5.0)),
-                        elevation: 4.0,
-                        onPressed: () {
-                          DatePicker.showTimePicker(context,
-                              theme: DatePickerTheme(
-                                containerHeight: 210.0,
-                              ),
-                              showTitleActions: true, onConfirm: (time) {
-                                print('confirm $time');
-                                _time = '${time.hour} : ${time.minute} : ${time.second}';
-                                setState(() {});
-                              }, currentTime: DateTime.now(), locale: LocaleType.en);
-                          setState(() {});
-                        },
-                        child: Container(
-                          alignment: Alignment.center,
-                          height: 50.0,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              Row(
-                                children: <Widget>[
-                                  Container(
-                                    child: Row(
-                                      children: <Widget>[
-                                        Icon(
-                                          Icons.access_time,
-                                          size: 18.0,
-                                          color: Colors.teal,
-                                        ),
-                                        Text(
-                                          " $_time",
-                                          style: TextStyle(
-                                              color: Colors.teal,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 18.0),
-                                        ),
-                                      ],
-                                    ),
-                                  )
-                                ],
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(left : 8.0),
-                                child: Text(
-                                  "  Change",
-                                  style: TextStyle(
-                                      color: Colors.teal,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 18.0),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        color: Colors.white,
+                    TimePickerSpinner(
+                      is24HourMode: false,
+                      onTimeChange: (time) {
+                        setState(() {
+                          _dateTime = time;
+                        });
+                      },
+                    ),
+                    new Container(
+                      margin: EdgeInsets.symmetric(
+                          vertical: 1
                       ),
-                    )
+                      child: new Text(
+                        _dateTime.hour.toString().padLeft(1, '0') + ':' +
+                            _dateTime.minute.toString().padLeft(1, '0') + ':' +
+                            _dateTime.second.toString().padLeft(1, '0'),
+                        style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold
+                        ),
+                      ),
+
+                    ),
+                    SizedBox(height: 20,)
                   ],
                 ),
                 BottomLargeButton(
@@ -172,7 +133,7 @@ class _JourneyPlanScreenState extends State<JourneyPlanScreen> {
                   },
                 ),
                 SizedBox(
-                  height: 30,
+                  height: 10,
                 ),
                 BottomLargeButton(
                     text: 'Search Ride',
@@ -298,4 +259,6 @@ class _JourneyPlanScreenState extends State<JourneyPlanScreen> {
       ],
     );
   }
+
+
 }
