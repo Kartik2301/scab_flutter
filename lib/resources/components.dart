@@ -159,7 +159,7 @@ class _RoomCardState extends State<RoomCard> {
               onPressed: (){
                 if(widget.joiningStatus==kJoinRequest) {
                   //Send Joining Requests
-                  Firestore.instance.collection(widget.source).document(widget.roomId)
+                  Firestore.instance.collection('places').document(widget.source).collection('rooms').document(widget.roomId)
                       .collection('requests').document(IntroScreen.getUid())
                       .setData({
                     'status': kPendingRequest,
@@ -177,11 +177,11 @@ class _RoomCardState extends State<RoomCard> {
                 else if(widget.joiningStatus==kConfirmJoin)
                 {
                   //Add new member in the room
-                  Firestore.instance.collection(widget.source).document(widget.roomId).get().then((value){
+                  Firestore.instance.collection('places').document(widget.source).collection('rooms').document(widget.roomId).get().then((value){
                     print('value + ${value.data}');
                     int numberOfMembers = value.data['numberOfMembers'];
                     if(numberOfMembers<4) {
-                      Firestore.instance.collection(widget.source).document(widget.roomId).updateData({
+                      Firestore.instance.collection('places').document(widget.source).collection('rooms').document(widget.roomId).updateData({
                         'member${numberOfMembers+1}': IntroScreen.getUid(),
                         'numberOfMembers': numberOfMembers+1,
                       });
@@ -239,7 +239,7 @@ class RequestCard extends StatelessWidget {
                   child: Text('Accept'),
                   onPressed: (){
                     //Implement Accept Functionality
-                    Firestore.instance.collection(source).document(roomId).collection('requests').document(requestedUID).updateData({
+                    Firestore.instance.collection('places').document(source).collection('rooms').document(roomId).collection('requests').document(requestedUID).updateData({
                       'status': kConfirmJoin,
                     });
                     Firestore.instance.collection('users').document(requestedUID).collection('myRooms').document(roomId).updateData({
@@ -250,8 +250,8 @@ class RequestCard extends StatelessWidget {
                 RaisedButton(
                   child: Text('Decline'),
                   onPressed: (){
-                    //TODO: Implement Reject Functionality
-                    Firestore.instance.collection(source).document(roomId).collection('requests').document(requestedUID).updateData({
+                    //Implement Reject Functionality
+                    Firestore.instance.collection('places').document(source).collection('rooms').document(roomId).collection('requests').document(requestedUID).updateData({
                       'status': kRejectedRequest,
                     });
                     Firestore.instance.collection('users').document(requestedUID).collection('myRooms').document(roomId).updateData({
@@ -402,15 +402,21 @@ class BottomLargeButton extends StatelessWidget {
 
 class TitleRow extends StatelessWidget {
   final String title;
-  TitleRow({this.title});
+  final Function onBackPress;
+  TitleRow({this.title,this.onBackPress});
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.start,
       children: <Widget>[
-        Icon(
-          Icons.keyboard_backspace,
-          color: kThemeColor,size: 35,),
+        FlatButton(
+          onPressed: onBackPress??(){
+            Navigator.of(context).pop();
+          },
+          child: Icon(
+            Icons.keyboard_backspace,
+            color: kThemeColor,size: 35,),
+        ),
         Padding(
           padding: EdgeInsets.all(8.0),
           child: Image(

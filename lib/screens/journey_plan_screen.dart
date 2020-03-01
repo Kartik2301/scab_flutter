@@ -19,7 +19,6 @@ int hour,minutes;
 String _time = "Time not set";
 
 class JourneyPlanScreen extends StatefulWidget {
-  static String id = 'journey_plan';
   static String username;
   final String mUid;
   JourneyPlanScreen({this.mUid});
@@ -69,7 +68,12 @@ class _JourneyPlanScreenState extends State<JourneyPlanScreen> {
               mainAxisSize: MainAxisSize.max,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                TitleRow(title: 'Create a Ride'),
+                TitleRow(
+                    title: 'Create a Ride',
+                    onBackPress: (){
+                      showDialog(context: context,
+                      builder: (context)=>showExitDialog(context));
+                },),
                 SizedBox(height: 80,),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -83,12 +87,12 @@ class _JourneyPlanScreenState extends State<JourneyPlanScreen> {
                       children: <Widget>[
                         Container(
                           color: Colors.grey[100],
-                          child: get_sourceDropDownButton(),
+                          child: getSourceDropDownButton(),
                         ),
                         SizedBox(height: 50,),
                         Container(
                           color: Colors.grey[100],
-                          child: get_destinationDropDownButton(),
+                          child: getDestinationDropDownButton(),
                         ),
                       ],
                     ),
@@ -173,12 +177,11 @@ class _JourneyPlanScreenState extends State<JourneyPlanScreen> {
                 BottomLargeButton(
                     text: 'Search Ride',
                     onPressed: () {
-                      if(_source==null||_destination==null)
-                      {
-                        Fluttertoast.showToast(
-                            msg: "Please Enter the Ride Details"
-                        );
-                      }
+                      if(_source==null||_destination==null) {
+                          Fluttertoast.showToast(
+                              msg: "Please Enter the Ride Details"
+                          );
+                        }
                       else {
                         Navigator.push(context, MaterialPageRoute
                           (builder: (context) => RoomSearch(user: _user,
@@ -195,7 +198,7 @@ class _JourneyPlanScreenState extends State<JourneyPlanScreen> {
     );
   }
 
-  DropdownButton<String> get_sourceDropDownButton() {
+  DropdownButton<String> getSourceDropDownButton() {
     List <DropdownMenuItem<String>> dropDownMenuItems = [];
     for (String event in placesList) {
       var newItem = DropdownMenuItem(
@@ -214,7 +217,7 @@ class _JourneyPlanScreenState extends State<JourneyPlanScreen> {
           });
         });
   }
-  DropdownButton<String> get_destinationDropDownButton() {
+  DropdownButton<String> getDestinationDropDownButton() {
     List <DropdownMenuItem<String>> dropDownMenuItems = [];
     for (String event in placesList) {
       var newItem = DropdownMenuItem(
@@ -275,20 +278,24 @@ class _JourneyPlanScreenState extends State<JourneyPlanScreen> {
   Future<bool> _onWillPop() async {
     return (await showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Are you sure?'),
-        content: Text('Do you want to exit an App'),
-        actions: <Widget>[
-          FlatButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text('No'),
-          ),
-          FlatButton(
-            onPressed: () => SystemChannels.platform.invokeMethod('SystemNavigator.pop'),
-            child: Text('Yes'),
-          ),
-        ],
-      ),
+      builder: (context) => showExitDialog(context),
     )) ?? false;
+  }
+
+  AlertDialog showExitDialog(BuildContext context) {
+    return AlertDialog(
+      title: Text('Exit',style: TextStyle(fontSize: 30),),
+      content: Text('Are you sure you don\'t want to share the ride?'),
+      actions: <Widget>[
+        FlatButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: Text('No'),
+        ),
+        FlatButton(
+          onPressed: () => SystemChannels.platform.invokeMethod('SystemNavigator.pop'),
+          child: Text('Yes'),
+        ),
+      ],
+    );
   }
 }
